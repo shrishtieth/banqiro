@@ -378,14 +378,6 @@ interface IERC20 {
     ) external returns (bool);
 }
 
-interface IBNBPrice {
-	function getLatestPrice() external view returns(int);
-}
-
-interface IBUSDPrice {
-	function getLatestPrice() external view returns(int);
-}
-
 interface Referal {
 	function getReferrer(address user) external view returns(address);
 
@@ -756,13 +748,11 @@ contract BanqiroTokenICO is Ownable {
 	uint256 public startTime;
 	uint256 public amountRaised;
 	address public treasury;
-	address public referalContract = 0x034be0E3C96170bfC4464848439230Df37F7d4CB;
-	address public vestingContract = 0x7671d4e46c44F1BEE245262D9F4B878c2eE6F4b4;
+	address public referalContract = 0x39bB667955D2DbA945dA814f47685Ab644Af35dd;
+	address public vestingContract = 0x3A987437b545A240079CAa091722239691A0A66D;
 	uint256 public tokensSold;
-	address public busd = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
-	address public wbnb = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
-	address public bnbPriceOracle = 0x12b217f2fDb1eEce03964E695bc45E70322E6154;
-	address public busdPriceOracle = 0x1C3cA4609142b5E37182F3387Ea87B655e082d35;
+	address public busd = 0xf8B8dEF2Eb952156F8f97E91d6A183953622E6D1;
+	address public usdt = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
 	address public topAccount;
 	address public marketing;
 	address public liquidity;
@@ -783,19 +773,19 @@ contract BanqiroTokenICO is Ownable {
 	mapping(address => mapping(address => uint256)) public rewardFromUser;
 
 
-	uint256 public firstBuyAmount = 5000000000; //###
+	uint256 public firstBuyAmount = 50000000000000000000; //###
 	uint256 public firstBuyTime = 777600; //###
-	uint256 public phase0Price = 13000000;
-	uint256 public phase1Price = 15000000; //0.01
-	uint256 public phase2Price = 18000000;
-	uint256 public phase3Price = 22000000;
-	uint256 public phase4Price = 24500000;
-	uint256 public phase5Price = 25500000;
-	uint256 public phase6Price = 26500000;
+	uint256 public phase0Price = 130000000000000000;
+	uint256 public phase1Price = 150000000000000000; //0.01
+	uint256 public phase2Price = 180000000000000000;
+	uint256 public phase3Price = 220000000000000000;
+	uint256 public phase4Price = 245000000000000000;
+	uint256 public phase5Price = 255000000000000000;
+	uint256 public phase6Price = 265000000000000000;
 	uint256 public poolAmount;
 	uint256 public poolAmountDistributed; //###
 	uint256 public stage3Time = 1036800; //###
-	uint256 public unlockPrice = 10000000000;
+	uint256 public unlockPrice = 100000000000000000000;
 
 	mapping(uint256 => uint256) public levelToCommision;
 	mapping(uint256 => uint256) public poolToSale;
@@ -830,8 +820,7 @@ contract BanqiroTokenICO is Ownable {
 
 	event FirstBuyUpdated(uint256 amount, uint256 time);
 
-	event ContractsUpdated(address referalContract, address vestingContract,
-		address bnbPriceOracle, address busdPriceOracle);
+	event ContractsUpdated(address referalContract, address vestingContract);
 
 	event ReferalIncomeDistributed(address user, address referrer, uint256 amountPurchased,
 		uint256 referalAmount, uint256 level);
@@ -861,13 +850,13 @@ contract BanqiroTokenICO is Ownable {
 		levelToCommision[8] = 100;
 		levelToCommision[9] = 50;
 		levelToCommision[10] = 50;
-		poolToSale[1] = 10000000000000;
-		poolToSale[2] = 25000000000000;
-		poolToSale[3] = 50000000000000;
-		poolToSale[4] = 100000000000000;
-		poolToSale[5] = 500000000000000;
+		poolToSale[1] = 100000000000000000000000;
+		poolToSale[2] = 250000000000000000000000;
+		poolToSale[3] = 500000000000000000000000;
+		poolToSale[4] = 1000000000000000000000000;
+		poolToSale[5] = 5000000000000000000000000;
 		IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-			0x10ED43C718714eb63d5aA57B78B54704E256024E
+			0xD99D1c33F9fC3444f8101754aBC46c52416550D1
 		);
 		uniswapV2Router = _uniswapV2Router;
 
@@ -878,7 +867,6 @@ contract BanqiroTokenICO is Ownable {
 		startTime = time;
 
 	}
-
 
 	function updatebanqiroTokenAddress(address token) external onlyOwner{
 		banqiro = token;
@@ -918,8 +906,6 @@ contract BanqiroTokenICO is Ownable {
 			_phase3Price, _phase4Price, _phase5Price);
 	}
 
-
-
 	function updateFirstBuy(uint256 amount, uint256 time) external onlyOwner {
 		firstBuyAmount = amount;
 		firstBuyTime = time;
@@ -934,15 +920,11 @@ contract BanqiroTokenICO is Ownable {
 
  
 
-	function updateContracts(address _referalContract, address _vestingContract,
-		address _bnbPriceOracle, address _busdPriceOracle) external onlyOwner {
+	function updateContracts(address _referalContract, address _vestingContract) external onlyOwner {
 		referalContract = _referalContract;
 		vestingContract = _vestingContract;
-		bnbPriceOracle = _bnbPriceOracle;
-		busdPriceOracle = _busdPriceOracle;
 
-		emit ContractsUpdated(_referalContract, _vestingContract,
-			_bnbPriceOracle, _busdPriceOracle);
+		emit ContractsUpdated(_referalContract, _vestingContract);
 
 	}
 
@@ -962,27 +944,23 @@ contract BanqiroTokenICO is Ownable {
 		}
 	}
 
-	function buyToken(address token, uint256 amount, address user) external payable {
-		if (!added[user]) {
-			investors.push(user);
+	function buyToken(address token, uint256 amount) external {
+		if (!added[msg.sender]) {
+			investors.push(msg.sender);
 		}
-		require(token == wbnb || token == busd, "Invalid currency");
-		if (token == wbnb) {
-			amount = msg.value;
-		}
-		uint256 currencyPrice = getPrice(token);
-		require(amount >= (firstBuyAmount * 10 ** 18 / currencyPrice), "User should invest atleast 50$");
+		require(token == usdt || token == busd, "Invalid currency");
+		require(amount >= firstBuyAmount, "User should invest atleast 50$");
 		uint256 stage = getStage();
 		require(stage > 0, "ICO has not started yet");  
 		uint256 price;
 		if (stage == 1) {
 			price = phase1Price;
 			if (startTime + firstBuyTime > block.timestamp) {
-				require(Referal(referalContract).isWhitelisted(user) ||
-					Referal(referalContract).getReferrer(user) != address(0), "Not Eligible, try later");
-				require(phase1Bought[user] == false, "Already Bought Tokens");
-				phase1Bought[user] = true;
-				amount = (firstBuyAmount * 10 ** 18 / currencyPrice);
+				require(Referal(referalContract).isWhitelisted(msg.sender ) ||
+					Referal(referalContract).getReferrer(msg.sender ) != address(0), "Not Eligible, try later"); //###
+				require(phase1Bought[msg.sender] == false, "Already Bought Tokens");
+				phase1Bought[msg.sender] = true;
+				amount = firstBuyAmount;
 
 			}
 		} else if (stage == 2) {
@@ -994,61 +972,71 @@ contract BanqiroTokenICO is Ownable {
 		} else if (stage == 5) {
 			price = phase5Price;
 		}
-		(uint256 tokenAmount, uint256 usdAmount) = getTokensForPrice(token, amount, price);
+		// uint256 tokenAmount = getTokensForPrice(amount, price);
+		uint256 tokenAmount = amount/price;
+		uint256 usdAmount = amount;
 		require(usdAmount >= firstBuyAmount, "Cannot buy below $50"); //###
 		tokensSold += tokenAmount;
 		require(tokensSold <= phase5Supply, "SOLD OUT!!"); //###
 		amountRaised += usdAmount;
 		if (token == busd) {
-			distributeRevenueBusd(amount, user);
-		} else if (token == wbnb) {
-			distributeRevenueBnb(amount, user);
+			distributeRevenue(amount, msg.sender ,busd);
+		} else if (token == usdt) {
+			distributeRevenue(amount, msg.sender ,usdt);
 		}
-		usdInvestedByUser[user] += usdAmount;
-		tokenBoughtUser[user] += tokenAmount;
-		Vesting(vestingContract).vestTokenIco(user, tokenAmount, stage);
-		emit TokensBought(user, usdAmount, tokenAmount);
+		usdInvestedByUser[msg.sender] += usdAmount;
+		tokenBoughtUser[msg.sender] += tokenAmount;
+		Vesting(vestingContract).vestTokenIco(msg.sender, tokenAmount, stage);
+		emit TokensBought(msg.sender, usdAmount, tokenAmount);
 
 	}
 
-	function distributeRevenueBusd(uint256 amount, address user) private {
+	function distributeRevenue(uint256 amount, address user, address token) private {
 		uint256 pool = (amount * referalPool) / 10000;
-		poolAmount += pool;
-		IERC20(busd).transferFrom(msg.sender, address(this), pool);
+		if(token == usdt){
+		  IERC20(token).transferFrom(msg.sender, address(this), pool);
+		  uint256 poolBusd = swapUsdtForBusd(pool);
+		  poolAmount += poolBusd;	
+		}
+		else{
+          poolAmount += pool;
+		  IERC20(token).transferFrom(msg.sender, address(this), pool);
+		}
 		uint256 board = (amount * boardCommision) / 10000;
-		IERC20(busd).transferFrom(msg.sender, boardWallet, board);
+		IERC20(token).transferFrom(msg.sender, boardWallet, board);
 		uint256 treasuryAmount = (amount * treasuryPercentage) / 10000;
-		IERC20(busd).transferFrom(msg.sender, treasury, treasuryAmount);
+		IERC20(token).transferFrom(msg.sender, treasury, treasuryAmount);
 		uint256 liquidityAmount = (amount * liquidityPercentage) / 10000;
-		IERC20(busd).transferFrom(msg.sender, liquidity, liquidityAmount);
+		IERC20(token).transferFrom(msg.sender, liquidity, liquidityAmount);
 		uint256 marketingAmount = (amount * marketingPercentage) / 10000;
-		IERC20(busd).transferFrom(msg.sender, marketing, marketingAmount);
+		IERC20(token).transferFrom(msg.sender, marketing, marketingAmount);
 		uint256 referalTotalAmount = (amount * referalTotal) / 10000;
-		uint256 referalAmount = distributeBusd(user, amount);
+		uint256 referalAmount = distributeToken(user, amount, token);
 		if (referalTotalAmount > referalAmount) {
-			IERC20(busd).transferFrom(msg.sender, topAccount, referalTotalAmount - referalAmount);
+			IERC20(token).transferFrom(msg.sender, topAccount, referalTotalAmount - referalAmount);
 		}
 	}
 
-	function distributeRevenueBnb(uint256 amount, address user) private {
-		uint256 pool = (amount * referalPool) / 10000;
-		uint256 poolBusd = swapEthForTokens(pool);
-		poolAmount += poolBusd;
-		uint256 board = (amount * boardCommision) / 10000;
-		payable(boardWallet).transfer(board);
-		uint256 treasuryAmount = (amount * treasuryPercentage) / 10000;
-		payable(treasury).transfer(treasuryAmount);
-		uint256 liquidityAmount = (amount * liquidityPercentage) / 10000;
-		payable(liquidity).transfer(liquidityAmount);
-		uint256 marketingAmount = (amount * marketingPercentage) / 10000;
-		payable(marketing).transfer(marketingAmount);
-		uint256 referalTotalAmount = (amount * referalTotal) / 10000;
-		uint256 referalAmount = distributeBnb(user, amount);
-		if (referalTotalAmount > referalAmount) {
-			payable(topAccount).transfer(referalTotalAmount - referalAmount);
-		}
-
-	}
+    function distributeToken(address user, uint256 amount, address token) public returns(uint256 total){
+     uint totalItemCount = 10;
+     address _user = user;
+        for (uint i = 1; i <= totalItemCount; i++) {
+            if (Referal(referalContract).getReferrer(_user)!= address(0)) {
+				if(getLevelsUnlocked(Referal(referalContract).getReferrer(_user)) >= i){
+                IERC20(token).transferFrom(msg.sender, Referal(referalContract).getReferrer(_user), amount*(levelToCommision[i])/10000);
+                 referalIncome[Referal(referalContract).getReferrer(_user)] += amount*(levelToCommision[i])/10000;
+                 rewardFromUser[Referal(referalContract).getReferrer(_user)][_user] = amount*(levelToCommision[i])/10000;
+                 emit ReferalIncomeDistributed(user,  Referal(referalContract).getReferrer(_user),amount,
+                 amount*(levelToCommision[i])/10000,i);
+                 total += amount*(levelToCommision[i])/10000;
+				}	
+                _user = Referal(referalContract).getReferrer(_user);
+            }
+			else{
+				return total;
+			}
+        }
+    }
 
 
 	function getStagePrice(uint256 stage) public view returns(uint256 price) {
@@ -1064,36 +1052,6 @@ contract BanqiroTokenICO is Ownable {
 			price = phase5Price;
 		}
 	}
-
-	function getPrice(address token) public view returns(uint256 price) {
-		if (token == busd) {
-			price = uint256(IBUSDPrice(busdPriceOracle).getLatestPrice());
-		} else if (token == wbnb) {
-			price = uint256(IBNBPrice(bnbPriceOracle).getLatestPrice());
-		}
-	}
-
-	function getPriceForTokens(address currency, uint256 tokenAmount)
-	public view returns(uint256 amount) {
-		uint256 stage = getStage();
-		uint256 tokenPrice = getStagePrice(stage);
-		uint256 currencyPrice = getPrice(currency);
-		return (tokenAmount * ((tokenPrice * 10 ** 18) / currencyPrice));
-	}
-
-	function getTokensForPrice(address token, uint256 amount, uint256 price)
-	public view returns(uint256 tokenAmount, uint256 usdPrice) {
-		uint256 currencyPrice = getPrice(token);
-		tokenAmount = (currencyPrice * amount) / price;
-		usdPrice = (currencyPrice * amount) / 10 ** 18;
-	}
-
-	function refundIfOver(uint256 price) private {
-		if (msg.value > price) {
-			payable(msg.sender).transfer(msg.value - price);
-		}
-	}
-
 
 	function getIcoReferalTrail(address user, uint256 amount) public view returns(Refer[] memory trail) {
 		uint totalItemCount = 10;
@@ -1145,53 +1103,6 @@ contract BanqiroTokenICO is Ownable {
 		}
 		return (10);
 	}
-
-
-
-    function distributeBusd(address user, uint256 amount) public returns(uint256 total){
-     uint totalItemCount = 10;
-     address _user = user;
-        for (uint i = 1; i <= totalItemCount; i++) {
-            if (Referal(referalContract).getReferrer(_user)!= address(0)) {
-				if(getLevelsUnlocked(Referal(referalContract).getReferrer(_user)) >= i){
-                IERC20(busd).transferFrom(msg.sender, Referal(referalContract).getReferrer(_user), amount*(levelToCommision[i])/10000);
-                 referalIncome[Referal(referalContract).getReferrer(_user)] += (getPrice(busd)*amount*(levelToCommision[i])/10000)/10**8;
-                 rewardFromUser[Referal(referalContract).getReferrer(_user)][_user] = (getPrice(busd)*amount*(levelToCommision[i])/10000)/10**8;
-                 emit ReferalIncomeDistributed(user,  Referal(referalContract).getReferrer(_user),getPrice(busd)*amount,
-                (getPrice(busd)*amount*(levelToCommision[i])/10000)/10**8,i);
-                 total += amount*(levelToCommision[i])/10000;
-				}
-                
-                _user = Referal(referalContract).getReferrer(_user);
-            }
-			else{
-				return total;
-			}
-        }
-    }
-
-    function distributeBnb(address user, uint256 amount) public payable returns(uint256 total){
-    uint totalItemCount = 10;
-     address _user = user;
-        for (uint i = 1; i <= totalItemCount; i++) {
-            if (Referal(referalContract).getReferrer(_user)!= address(0)) {
-				if(getLevelsUnlocked(Referal(referalContract).getReferrer(_user)) >= i){
-                payable(Referal(referalContract).getReferrer(_user)).transfer(amount*(levelToCommision[i])/10000);
-                referalIncome[Referal(referalContract).getReferrer(_user)] += (getPrice(wbnb)*amount*(levelToCommision[i])/10000)/10**8;
-                rewardFromUser[Referal(referalContract).getReferrer(_user)][_user] = (getPrice(wbnb)*amount*(levelToCommision[i])/10000)/10**8;
-                total += amount*(levelToCommision[i])/10000;
-                emit ReferalIncomeDistributed(user,  Referal(referalContract).getReferrer(_user),getPrice(wbnb)*amount,
-                (getPrice(wbnb)*amount*(levelToCommision[i])/10000)/10**8,i);
-				}
-                _user = Referal(referalContract).getReferrer(_user);
-            }
-			else{
-				return total;
-			}
-        }
-    }
-
-
 
 	receive() external payable {}
 
@@ -1285,15 +1196,14 @@ contract BanqiroTokenICO is Ownable {
 		}
 	}
 
-	function swapEthForTokens(uint256 tokenAmount) public payable returns(uint256 busdAmount) {
+	function swapUsdtForBusd(uint256 usdtAmount) public payable returns(uint256 busdAmount) {
 
 		address[] memory path = new address[](2);
-		path[0] = uniswapV2Router.WETH();
+		path[0] = usdt;
 		path[1] = busd;
 		uint[] memory amounts = new uint[](2);
-		amounts = uniswapV2Router.swapExactETHForTokens {
-			value: tokenAmount
-		}(
+		amounts = uniswapV2Router.swapExactTokensForTokens(
+			usdtAmount,
 			0,
 			path,
 			address(this),
