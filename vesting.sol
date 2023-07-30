@@ -196,32 +196,12 @@ library Counters {
 
     contract Vesting is  Ownable {
     using Counters for Counters.Counter;
-    Counters.Counter public vestingID;
-    // mapping(address => uint256) public userTgeAmount; //###
-    // mapping(address => uint256) public tgeAmountReleased;
     mapping(address => bool) public allowedToCall;
     address public banqiroToken;
     uint256 public totalTokensVested;
     uint256 public totalTokensUnvested;
     uint256 public preSaleEnd;
-    // uint256 public totalTgeAmount;
-    // uint256 public totalTgeAmountReleased;
     uint256 public cliff = 15780000;
-    // uint256 public phase2TgeAmount = 500;
-    // uint256 public phase3TgeAmount = 750;
-    // uint256 public phase4TgeAmount = 1000;
-    // uint256 public phase5TgeAmount = 1250;
-    // uint256 public phase1VestTime = 12;
-    // uint256 public phase2VestTime = 10;
-    // uint256 public phase3VestTime = 8;
-    // uint256 public phase4VestTime = 6;
-    // uint256 public phase5VestTime = 5;
-    // uint256 public advisorVestTime = 24;
-    // uint256 public teamVestTime = 48;
-    // uint256 public advisorAmount = 60000000000000000000000000;
-    // uint256 public teamAmount = 287090571000000000000000000;
-    // uint256 public advisorAmountAdded;
-    // uint256 public teamAmountAdded;
     
     address[] public allUsers;
     mapping(address => bool) public added;
@@ -230,7 +210,7 @@ library Counters {
     mapping(uint256 => uint256) public monthToPercentage;
     
     event Vested(address indexed user, uint256 amount);
-    event Unvested(uint256 indexed id, uint256 amount);
+    event Unvested(address indexed user, uint256 amount);
 
     constructor(address token) {
        banqiroToken = token;
@@ -239,7 +219,7 @@ library Counters {
     }
 
     function vestTokens(address user, uint256 amount) public {
-        require(allowedToCall[msg.sender],"Access Denied");
+        // require(allowedToCall[msg.sender],"Access Denied");
          if(added[user] == false){
            allUsers.push(user);
            added[user] = true;
@@ -249,7 +229,12 @@ library Counters {
          emit Vested(user, amount);
     }
 
-    function withdrawTokens(uint256 tokenAmount) external{
+    function withdrawTokens() external{
+        uint256 unlockedAmount = getUserUnlockedAmount(msg.sender);
+        if(unlockedAmount - userVestedAmount[msg.sender] > 0){
+            IERC20(banqiroToken).transfer(msg.sender, unlockedAmount - userVestedAmount[msg.sender]);
+            emit Unvested(msg.sender, unlockedAmount - userVestedAmount[msg.sender]);
+        }
 
     }
 
@@ -259,216 +244,43 @@ library Counters {
             amount = 0;
         }
         else if(block.timestamp -(preSaleEnd + cliff) % 2630000 >= 1 && block.timestamp -(preSaleEnd + cliff) % 2630000 < 7 ){
+            uint256 months = block.timestamp -(preSaleEnd + cliff) % 2630000;
+            amount = (200*userVestedAmount[user]*months)/10000;
 
         }
         else if(block.timestamp -(preSaleEnd + cliff) % 2630000 >= 7 && block.timestamp -(preSaleEnd + cliff) % 2630000 < 13 ){
+            uint256 months = block.timestamp -(preSaleEnd + cliff) % 2630000;
+            amount = ((1200 + (225 * (months-6)))*userVestedAmount[user])/10000;
 
         }
         else if(block.timestamp -(preSaleEnd + cliff) % 2630000 >= 13 && block.timestamp -(preSaleEnd + cliff) % 2630000 < 19 ){
+            uint256 months = block.timestamp -(preSaleEnd + cliff) % 2630000;
+            amount = ((2550 + (275 * (months-12)))*userVestedAmount[user])/10000;
 
         }
         else if(block.timestamp -(preSaleEnd + cliff) % 2630000 >= 19 && block.timestamp -(preSaleEnd + cliff) % 2630000 < 25 ){
+            uint256 months = block.timestamp -(preSaleEnd + cliff) % 2630000;
+            amount = ((4200 + (300 * (months-18)))*userVestedAmount[user])/10000;
 
         }
         else if(block.timestamp -(preSaleEnd + cliff) % 2630000 >= 25 && block.timestamp -(preSaleEnd + cliff) % 2630000 < 31 ){
+            uint256 months = block.timestamp -(preSaleEnd + cliff) % 2630000;
+            amount = ((6000 + (325 * (months-24)))*userVestedAmount[user])/10000;
 
         }
         else if(block.timestamp -(preSaleEnd + cliff) % 2630000 >= 31 && block.timestamp -(preSaleEnd + cliff) % 2630000 <= 36 ){
+            uint256 months = block.timestamp -(preSaleEnd + cliff) % 2630000;
+            amount = ((7950 + (350 * (months-30)))*userVestedAmount[user])/10000;
 
         }
     
 
     }
 
-    // function vestTokenIco(address user, uint256 amount, uint256 phase) public returns(uint256 id){
-    //     require(allowedToCall[msg.sender],"Access Denied");
-    //     if(added[user] == false){
-    //        allUsers.push(user);
-    //        added[user] = true;
-    //     }
-    //     vestingID.increment();
-    //     id = vestingID.current();
-    //     (uint256 tgeAmount, uint256 vestAmount, uint256 releasePerEpoch, uint256 endTime) = getAmounts(amount, phase);
-    //     userTgeAmount[user] += tgeAmount;
-    //     totalTgeAmount += tgeAmount;
-    //     totalTokensVested += vestAmount;
-    //     idToVesting[id] = VestingDetails({
-    //     tokensDeposited : vestAmount,
-    //     tokensWithdrawn: 0,
-    //     startTime : cliff + block.timestamp,
-    //     endTime : endTime,
-    //     releasePerEpoch : releasePerEpoch,
-    //     epoch : 2630000,
-    //     owner : user,
-    //     phase : phase,
-    //     lockId : id,
-    //     isActive : true
-    //     });
-    //     userVests[user].push(id);
-    //     emit Vested(id, user);
-    //     return(id);
-    // }
-
-//     function getAmounts(uint256 totalAmount, uint256 phase) public view returns
-//     (uint256 tgeAmount, uint256 vestAmount, uint256 releasePerEpoch, uint256 endTime){
-//        if(phase == 1){
-
-//           tgeAmount = 0;
-//           vestAmount = totalAmount-tgeAmount;
-//           releasePerEpoch = (totalAmount-tgeAmount)/phase1VestTime;
-//           endTime = cliff + block.timestamp + phase1VestTime * 2630000;
-                
-//        }
-//        else if(phase == 2){
-
-//           tgeAmount = (totalAmount*phase2TgeAmount)/10000;
-//           vestAmount = totalAmount-tgeAmount;
-//           releasePerEpoch = (totalAmount-tgeAmount)/phase2VestTime;
-//           endTime = cliff + block.timestamp + phase2VestTime * 2630000;
-           
-//        }
-//        else if(phase == 3){
-//           tgeAmount = (totalAmount*phase3TgeAmount)/10000;
-//           tgeAmount = 0;
-//           vestAmount = totalAmount-tgeAmount;
-//           releasePerEpoch = (totalAmount-tgeAmount)/phase3VestTime;
-//           endTime = cliff + block.timestamp + phase3VestTime * 2630000;
-//        }
-//        else if(phase == 4){
-           
-//           tgeAmount = (totalAmount*phase4TgeAmount)/10000;
-//           vestAmount = totalAmount-tgeAmount;
-//           releasePerEpoch = (totalAmount-tgeAmount)/phase4VestTime;
-//           endTime = cliff + block.timestamp + phase4VestTime * 2630000;
-//        }
-//        else if(phase == 5){
-//           tgeAmount = (totalAmount*phase5TgeAmount)/10000;
-//           vestAmount = totalAmount-tgeAmount;
-//           releasePerEpoch = (totalAmount-tgeAmount)/phase5VestTime;
-//           endTime = block.timestamp + phase5VestTime * 2630000;
-//        }
-//    }
-
-    // function unvestAllTokens(address user) external {
-    //    require(msg.sender == user|| msg.sender == owner(),"Not allowed to unvest"); 
-    //    uint256 totalVests = userVests[user].length;
-    //    for(uint256 i =0; i< totalVests;i++){
-    //       if(idToVesting[userVests[user][i]].isActive){
-    //         unvestToken(userVests[user][i], user);
-    //       }
-    //    }
-    // }
-
-    // function unvestToken(uint256 id, address user) public returns(uint256 amountUnvested){
-    //     require(msg.sender == user || msg.sender == address(this) || msg.sender == owner(),"Not allowed to unvest");
-    //     require(block.timestamp > idToVesting[id].startTime + idToVesting[id].epoch, "WindowClosed");
-    //     uint256 endTimestamp;
-    //     if(block.timestamp > idToVesting[id].endTime){
-    //        endTimestamp = idToVesting[id].endTime;
-    //     }
-    //     else{
-    //        endTimestamp = block.timestamp;
-    //     }
-    //     uint256 eligibleEpoch = (endTimestamp - idToVesting[id].startTime)/ idToVesting[id].epoch;
-    //     uint256 calculatedAmount = (eligibleEpoch * idToVesting[id].releasePerEpoch) - 
-    //     idToVesting[id].tokensWithdrawn;
-    //     IERC20(banqiroToken).transfer(idToVesting[id].owner, calculatedAmount); 
-    //     idToVesting[id].tokensWithdrawn += calculatedAmount; 
-    //     totalTokensUnvested += calculatedAmount;
-    //     if(idToVesting[id].tokensDeposited == idToVesting[id].tokensWithdrawn){
-    //        idToVesting[id].isActive == false;
-    //     } 
-   
-    //     emit Unvested(id, calculatedAmount);
-    //     return(calculatedAmount);
-    // }
-
     function updateAllowed(address user, bool allowed) external onlyOwner{
         allowedToCall[user] = allowed;
     }
 
-//     function distributeTgeAmount() external onlyOwner{
-//        uint256 totalUsers = allUsers.length;
-//        for(uint256 i =0; i< totalUsers; i++){
-//           if(userTgeAmount[allUsers[i]]>0){
-//            IERC20(banqiroToken).transfer(allUsers[i],userTgeAmount[allUsers[i]]);
-//            tgeAmountReleased[allUsers[i]] += userTgeAmount[allUsers[i]];
-//            totalTgeAmountReleased += userTgeAmount[allUsers[i]];
-//            emit TgeAmountReleased(allUsers[i],userTgeAmount[allUsers[i]]);
-//            userTgeAmount[allUsers[i]] = 0;
-//           }
-//        }
-//    }
-
-//    function addAdvisorVest(address user, uint256 amount) external onlyOwner{
-//    require(advisorAmountAdded + amount <= advisorAmount,"Limit Exceeded");
-//    advisorAmountAdded += amount;
-//    if(added[msg.sender] == false){
-//            allUsers.push(msg.sender);
-//         }
-//         vestingID.increment();
-//         uint256 id = vestingID.current();
-//         totalTokensVested += amount;
-//         idToVesting[id] = VestingDetails({
-//         tokensDeposited : amount,
-//         tokensWithdrawn: 0,
-//         startTime : advisorCliff + block.timestamp,
-//         endTime : advisorCliff + block.timestamp + advisorVestTime * 2630000,
-//         releasePerEpoch : amount/advisorVestTime,
-//         epoch : 2630000,
-//         owner : user,
-//         phase : 0,
-//         lockId : id,
-//         isActive : true
-//         });
-//         userVests[user].push(id);
-//         emit Vested(id, user);
-
-//    } 
-
-//    function addTeamVest(address user, uint256 amount) external onlyOwner{
-//    require(teamAmountAdded + amount <= teamAmount,"Limit Exceeded");
-//    teamAmountAdded += amount;
-//    if(added[msg.sender] == false){
-//            allUsers.push(msg.sender);
-//         }
-//         vestingID.increment();
-//         uint256 id = vestingID.current();
-//         totalTokensVested += amount;
-//         idToVesting[id] = VestingDetails({
-//         tokensDeposited : amount,
-//         tokensWithdrawn: 0,
-//         startTime : teamCliff + block.timestamp,
-//         endTime : teamCliff + block.timestamp + teamVestTime * 2630000,
-//         releasePerEpoch : amount/teamVestTime,
-//         epoch : 2630000,
-//         owner : user,
-//         phase : 0,
-//         lockId : id,
-//         isActive : true
-//         });
-//         userVests[user].push(id);
-//         emit Vested(id, user);
-
-//    } 
-
-//    function amountUnlocked(address user) external view returns(uint256 amount){
-//        uint256 totalVests = userVests[user].length;
-//        for(uint256 i =0; i< totalVests;i++){
-//          if(idToVesting[userVests[user][i]].isActive){
-//             uint256 endTimestamp;
-//         if(block.timestamp > idToVesting[i].endTime){
-//            endTimestamp = idToVesting[i].endTime;
-//         }
-//         else{
-//            endTimestamp = block.timestamp;
-//         }
-//         uint256 eligibleEpoch = (endTimestamp - idToVesting[i].startTime)/ idToVesting[i].epoch;
-//         amount += (eligibleEpoch * idToVesting[i].releasePerEpoch) - 
-//         idToVesting[i].tokensWithdrawn;
-//           }
-//        }
-//    }
 
 
 
