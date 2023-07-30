@@ -268,13 +268,17 @@ library Counters {
             amount = ((6000 + (325 * (months-24)))*userVestedAmount[user])/10000;
 
         }
-        else if(block.timestamp -(preSaleEnd + cliff) % 2630000 >= 31){
+        else if(block.timestamp -(preSaleEnd + cliff) % 2630000 >= 31 && block.timestamp -(preSaleEnd + cliff) % 2630000 < 36){
+            uint256 months = block.timestamp -(preSaleEnd + cliff) % 2630000;
+            amount = ((7950 + (350 * (months-30)))*userVestedAmount[user])/10000;
+
+        }
+        else if(block.timestamp -(preSaleEnd + cliff) % 2630000 >= 36){
             uint256 months = block.timestamp -(preSaleEnd + cliff) % 2630000;
             if(months > 36){
                 months = 36;
             }
-            amount = ((7950 + (350 * (months-30)))*userVestedAmount[user])/10000;
-
+            amount = (10000*userVestedAmount[user])/10000;
         }
     
 
