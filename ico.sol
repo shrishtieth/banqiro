@@ -973,7 +973,7 @@ contract BanqiroTokenICO is Ownable {
 		uint256 currencyPrice = getPrice(token);
 		require(amount >= (firstBuyAmount * 10 ** 18 / currencyPrice), "User should invest atleast 50$");
 		uint256 stage = getStage();
-		require(stage > 0, "ICO has not started yet");
+		require(stage > 0, "ICO has not started yet");  
 		uint256 price;
 		if (stage == 1) {
 			price = phase1Price;
