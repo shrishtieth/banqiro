@@ -769,7 +769,7 @@ contract BanqiroTokenICO is Ownable {
 
 	mapping(address => uint256) public tokenBoughtUser;
 	mapping(address => uint256) public usdInvestedByUser;
-	mapping(address => bool) public phase1Bought;
+	mapping(address => bool) public phase0Bought;
 	mapping(address => mapping(address => uint256)) public rewardFromUser;
 
 
@@ -810,11 +810,11 @@ contract BanqiroTokenICO is Ownable {
 	event TokensBought(address indexed investor, uint256 indexed usdAmount,
 		uint256 indexed tokenAmount);
 
-	event SupplyEdited(uint256 phase1Supply, uint256 phase2Supply,
-		uint256 phase3Supply, uint256 phase4Supply, uint256 phase5Supply);
+	event SupplyEdited(uint256 phase0Supply, uint256 phase1Supply, uint256 phase2Supply,
+		uint256 phase3Supply, uint256 phase4Supply, uint256 phase5Supply, uint256 phase6Supply);
 
-	event PriceUpdated(uint256 phase1Price, uint256 phase2Price,
-		uint256 phase3Price, uint256 phase4Price, uint256 phase5Price);
+	event PriceUpdated(uint256 phase0Price, uint256 phase1Price, uint256 phase2Price,
+		uint256 phase3Price, uint256 phase4Price, uint256 phase5Price, uint256 phase6Price);
 
 	event TreasuryUpdated(address treasury);
 
@@ -881,29 +881,33 @@ contract BanqiroTokenICO is Ownable {
 		boardWallet = _board;
 	}
 
-	function updateSupply(uint256 _phase1Supply, uint256 _phase2Supply,
-		uint256 _phase3Supply, uint256 _phase4Supply, uint256 _phase5Supply) external onlyOwner {
+	function updateSupply(uint256 _phase0Supply, uint256 _phase1Supply, uint256 _phase2Supply,
+		uint256 _phase3Supply, uint256 _phase4Supply, uint256 _phase5Supply, uint256 _phase6Supply) external onlyOwner {
+		phase0Supply = _phase0Supply;
 		phase1Supply = _phase1Supply;
 		phase2Supply = _phase2Supply;
 		phase3Supply = _phase3Supply;
 		phase4Supply = _phase4Supply;
 		phase5Supply = _phase5Supply;
+		phase6Supply = _phase6Supply;
 
-		emit SupplyEdited(_phase1Supply, _phase2Supply,
-			_phase3Supply, _phase4Supply, _phase5Supply);
+		emit SupplyEdited(_phase0Supply, _phase1Supply, _phase2Supply,
+			_phase3Supply, _phase4Supply, _phase5Supply, _phase6Supply);
 
 	}
 
-	function editPrice(uint256 _phase1Price, uint256 _phase2Price,
-		uint256 _phase3Price, uint256 _phase4Price, uint256 _phase5Price) external onlyOwner {
+	function editPrice(uint256 _phase0Price, uint256 _phase1Price, uint256 _phase2Price,
+		uint256 _phase3Price, uint256 _phase4Price, uint256 _phase5Price, uint256 _phase6Price) external onlyOwner {
+		phase0Price = _phase0Price;
 		phase1Price = _phase1Price;
 		phase2Price = _phase2Price;
 		phase3Price = _phase3Price;
 		phase4Price = _phase4Price;
 		phase5Price = _phase5Price;
+		phase6Price = _phase6Price;
 
-		emit PriceUpdated(_phase1Price, _phase2Price,
-			_phase3Price, _phase4Price, _phase5Price);
+		emit PriceUpdated(_phase0Price, _phase1Price, _phase2Price,
+			_phase3Price, _phase4Price, _phase5Price, _phase6Price);
 	}
 
 	function updateFirstBuy(uint256 amount, uint256 time) external onlyOwner {
@@ -929,7 +933,11 @@ contract BanqiroTokenICO is Ownable {
 	}
 
 	function getStage() public view returns(uint256 stage) {
-		if (block.timestamp > startTime && tokensSold < phase1Supply) {
+		require(block.timestamp > startTime,"Sale not started");
+		if(block.timestamp > startTime && tokensSold < phase0Supply ){
+            return(0);
+		}
+		else if (tokensSold >= phase0Supply && tokensSold < phase1Supply) {
 			return (1);
 		} else if (tokensSold >= phase1Supply && tokensSold < phase2Supply) {
 			return (2);
@@ -937,10 +945,10 @@ contract BanqiroTokenICO is Ownable {
 			return (3);
 		} else if (tokensSold >= phase3Supply && tokensSold < phase4Supply) {
 			return (4);
-		} else if (tokensSold >= phase4Supply && tokensSold <= phase5Supply) {
+		} else if (tokensSold >= phase4Supply && tokensSold < phase5Supply) {
 			return (5);
-		} else {
-			return (0);
+		} else if (tokensSold >= phase5Supply && tokensSold <= phase6Supply) {
+			return (6);
 		}
 	}
 
@@ -950,20 +958,24 @@ contract BanqiroTokenICO is Ownable {
 		}
 		require(token == usdt || token == busd, "Invalid currency");
 		require(amount >= firstBuyAmount, "User should invest atleast 50$");
+		require(block.timestamp > startTime, "ICO has not started yet");  
 		uint256 stage = getStage();
-		require(stage > 0, "ICO has not started yet");  
 		uint256 price;
-		if (stage == 1) {
-			price = phase1Price;
+		if (stage == 0) {
+			price = phase0Price;
 			if (startTime + firstBuyTime > block.timestamp) {
 				require(Referal(referalContract).isWhitelisted(msg.sender ) ||
 					Referal(referalContract).getReferrer(msg.sender ) != address(0), "Not Eligible, try later"); //###
-				require(phase1Bought[msg.sender] == false, "Already Bought Tokens");
-				phase1Bought[msg.sender] = true;
+				require(phase0Bought[msg.sender] == false, "Already Bought Tokens");
+				phase0Bought[msg.sender] = true;
 				amount = firstBuyAmount;
 
 			}
-		} else if (stage == 2) {
+		}
+		else if (stage == 1){
+			price = phase1Price;
+		} 
+		else if (stage == 2) {
 			price = phase2Price;
 		} else if (stage == 3) {
 			price = phase3Price;
@@ -972,12 +984,15 @@ contract BanqiroTokenICO is Ownable {
 		} else if (stage == 5) {
 			price = phase5Price;
 		}
+		else if (stage == 6) {
+			price = phase6Price;
+		}
 		// uint256 tokenAmount = getTokensForPrice(amount, price);
 		uint256 tokenAmount = amount/price;
 		uint256 usdAmount = amount;
 		require(usdAmount >= firstBuyAmount, "Cannot buy below $50"); //###
 		tokensSold += tokenAmount;
-		require(tokensSold <= phase5Supply, "SOLD OUT!!"); //###
+		require(tokensSold <= phase6Supply, "SOLD OUT!!"); //###
 		amountRaised += usdAmount;
 		if (token == busd) {
 			distributeRevenue(amount, msg.sender ,busd);
@@ -1040,7 +1055,10 @@ contract BanqiroTokenICO is Ownable {
 
 
 	function getStagePrice(uint256 stage) public view returns(uint256 price) {
-		if (stage == 1) {
+		if (stage == 0) {
+			price = phase0Price;
+		}
+		else if (stage == 1) {
 			price = phase1Price;
 		} else if (stage == 2) {
 			price = phase2Price;
@@ -1050,6 +1068,9 @@ contract BanqiroTokenICO is Ownable {
 			price = phase4Price;
 		} else if (stage == 5) {
 			price = phase5Price;
+		}
+		else if (stage == 6) {
+			price = phase6Price;
 		}
 	}
 
