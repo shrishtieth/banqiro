@@ -750,16 +750,12 @@ contract BanqiroTokenICO is Ownable {
     uint256 public endTime;
     uint256 public seedSaleAmountRaised;
 	uint256 public amountRaised;
-	address public treasury;
 	address public referalContract = 0x39bB667955D2DbA945dA814f47685Ab644Af35dd;
 	address public vestingContract = 0x3A987437b545A240079CAa091722239691A0A66D;
     uint256 public tokenSoldSeedSale;
 	uint256 public tokensSold;
 	address public busd = 0xf8B8dEF2Eb952156F8f97E91d6A183953622E6D1;
 	address public usdt = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
-	address public topAccount;
-	address public marketing;
-	address public liquidity;
 	address[] public investors;
 	IUniswapV2Router02 public uniswapV2Router; // uniswap dex router
 
@@ -778,11 +774,14 @@ contract BanqiroTokenICO is Ownable {
 	mapping(address => uint256) public preRegisterationUsdInvestedByUser;
 	mapping(address => uint256) public totalUsdInvestedByUser;
 	mapping(address => uint256) public saleUsdInvestedByUser;
+	mapping(address => uint256) public bonusSaleUsdInvestedByUser;
+	mapping(address => uint256) public bonusTokenBoughtUser;
 	mapping(address => mapping(address => uint256)) public rewardFromUser;
 
 
 	uint256 public seedSaleBuy = 50000000000000000000000;
 	uint256 public firstBuyAmount = 50000000000000000000; //###
+	uint256 public maxPurchase = 50000000000000000000000;
 	uint256 public phase0Price = 130000000000000000;
 	uint256 public phase1Price = 150000000000000000; //0.01
 	uint256 public phase2Price = 180000000000000000;
@@ -800,13 +799,34 @@ contract BanqiroTokenICO is Ownable {
 	mapping(address => uint256) public poolReward;
 	mapping(address => uint256) public referalIncome;
 
-	uint256 public boardCommision = 800;
-	address public boardWallet = 0x50674df56364b20b77b337a427290b5A32D72896;
-	uint256 public referalPool = 500;
-	uint256 public treasuryPercentage = 900;
-	uint256 public liquidityPercentage = 4000;
-	uint256 public marketingPercentage = 1200;
-	uint256 public referalTotal = 2700;//##
+	address public bnqEOOD;
+	address public bnqTechJSC;
+	address public salesWallet;
+	address public bnqMarketingJSC;
+	address public boardWallet;
+	address public topAccount;
+
+	uint256 public seedEOODPercentage = 3000;
+	uint256 public seedTechJSCPercentage = 5000;
+	uint256 public seedMarketingJSCPercentage = 1000;
+	uint256 public seedAffiliatePercentage = 1000;
+
+	uint256 public EOODPercentage = 3000;
+	uint256 public techJSCPercentage = 3000;
+	uint256 public salesPercentage = 400;
+	uint256 public boardPercentage = 250;
+	uint256 public marketingJSCPercentage = 350;
+	uint256 public affiliatePercentage = 2500;
+	uint256 public poolPercentage = 500;
+
+
+	uint256 public bonusEOODPercentage = 2000;
+	uint256 public bonusTechJSCPercentage = 4000;
+	uint256 public bonusSalesPercentage = 400;
+	uint256 public bonusBoardPercentage = 350;
+	uint256 public bonusMarketingJSCPercentage = 250;
+
+    
 
 	struct Refer {
 		address user;
@@ -825,7 +845,6 @@ contract BanqiroTokenICO is Ownable {
 
 	event TreasuryUpdated(address treasury);
 
-	event FirstBuyUpdated(uint256 amount, uint256 time);
 
 	event ContractsUpdated(address referalContract, address vestingContract);
 
@@ -843,10 +862,6 @@ contract BanqiroTokenICO is Ownable {
 
 		banqiro = (banqiroToken);
 		seedSaleStartime = _start;
-		treasury = 0x1E43491669996300761aFa7Ac376bF2a7a14d2B9;
-		liquidity = 0x2951b1e8Ec2CE5F96eE3fd8a1c513DCf5cB6D994;
-		marketing = 0x4704AD38b01630a4F9F6bb1264Af31f2fB2B2b43;
-		topAccount = 0x53cd99FBc681DfFAeA67165Bb28C49cfA5A5d000;
 		levelToCommision[1] = 1000;
 		levelToCommision[2] = 400;
 		levelToCommision[3] = 300;
@@ -879,13 +894,18 @@ contract BanqiroTokenICO is Ownable {
 		banqiro = token;
 	}
 
-	function updateWallet(address _treasury, address _topAccount,
-	address _marketing, address _liquidity, address _board) external onlyOwner{
-		treasury = _treasury;
-		topAccount = _topAccount;
-		marketing = _marketing;
-		liquidity = _liquidity;
-		boardWallet = _board;
+	function updateWallet(address _bnqEOOD,
+	address _bnqTechJSC,
+	address _salesWallet,
+	address _bnqMarketingJSC,
+	address _boardWallet,
+	address _topAccount) external onlyOwner{
+	bnqEOOD = _bnqEOOD;
+	bnqTechJSC = _bnqTechJSC;
+	salesWallet = _salesWallet;
+	bnqMarketingJSC = _bnqMarketingJSC;
+	boardWallet = _boardWallet;
+	topAccount = _topAccount;
 	}
 
 	function updateSupply(uint256 _phase0Supply, uint256 _phase1Supply, uint256 _phase2Supply,
@@ -917,12 +937,11 @@ contract BanqiroTokenICO is Ownable {
 			_phase3Price, _phase4Price, _phase5Price, _phase6Price);
 	}
 
-	// function updateFirstBuy(uint256 amount, uint256 time) external onlyOwner {
-	// 	firstBuyAmount = amount;
-	// 	firstBuyTime = time;
+	function updatePurchaseValue(uint256 minAmount, uint256 maxAmount) external onlyOwner {
+		firstBuyAmount = minAmount;
+		maxPurchase = maxAmount;
 
-	// 	emit FirstBuyUpdated(amount, time);
-	// }
+	}
 
 
 	function updateLevelToCommision(uint256 level, uint256 commision) external onlyOwner{
@@ -1011,23 +1030,43 @@ contract BanqiroTokenICO is Ownable {
 		   seedSaleAmountRaised += usdAmount;
 		   seedSaleUsdInvestedByUser[msg.sender] += usdAmount;
            seedSaleTokenBoughtUser[msg.sender] += tokenAmount;
+		   if (token == busd) {
+			distributeSeedSaleRevenue(amount, msg.sender ,busd);
+		   } else if (token == usdt) {
+			distributeSeedSaleRevenue(amount, msg.sender ,usdt);
+		   }
 		}
-		else{
+		else if(stage >= 1 && stage <= 4){
            tokensSold += tokenAmount;
-		   require(tokensSold <= phase6Supply, "SOLD OUT!!"); //###
 	       amountRaised += usdAmount;
 		   saleUsdInvestedByUser[msg.sender] += usdAmount;
            saleTokenBoughtUser[msg.sender] += tokenAmount;
+		   require(saleUsdInvestedByUser[msg.sender] <= maxPurchase, "Cannot Purchase more than $50.000 worth of token");
+		   if (token == busd) {
+			distributeRevenue(amount, msg.sender ,busd);
+	    	} else if (token == usdt) {
+			distributeRevenue(amount, msg.sender ,usdt);
+	    	}
+		}
+		else{
+		   tokensSold += tokenAmount;
+		   require(tokensSold <= phase6Supply, "SOLD OUT!!"); //###
+	       amountRaised += usdAmount;
+		   bonusSaleUsdInvestedByUser[msg.sender] += usdAmount;
+           bonusTokenBoughtUser[msg.sender] += tokenAmount;
+           require(bonusSaleUsdInvestedByUser[msg.sender] <= maxPurchase, 
+		   "Cannot Purchase more than $50.000 worth of token in bonus Sale");
+		   if (token == busd) {
+			distributeBonusRevenue(amount, msg.sender ,busd);
+	    	} else if (token == usdt) {
+			distributeBonusRevenue(amount, msg.sender ,usdt);
+		    }
 		}
 
 		totalUsdInvestedByUser[msg.sender] += usdAmount;
 	    totalTokenBoughtUser[msg.sender] += tokenAmount;
 	
-		if (token == busd) {
-			distributeRevenue(amount, msg.sender ,busd);
-		} else if (token == usdt) {
-			distributeRevenue(amount, msg.sender ,usdt);
-		}
+		
 		
 		// Vesting(vestingContract).vestTokenIco(msg.sender, tokenAmount, stage);
 		emit TokensBought(msg.sender, usdAmount, tokenAmount);
@@ -1035,7 +1074,7 @@ contract BanqiroTokenICO is Ownable {
 	}
 
 	function distributeRevenue(uint256 amount, address user, address token) private {
-		uint256 pool = (amount * referalPool) / 10000;
+		uint256 pool = (amount * poolPercentage) / 10000;
 		if(token == usdt){
 		  IERC20(token).transferFrom(user, address(this), pool);
 		  uint256 poolBusd = swapUsdtForBusd(pool);
@@ -1045,15 +1084,17 @@ contract BanqiroTokenICO is Ownable {
           poolAmount += pool;
 		  IERC20(token).transferFrom(user, address(this), pool);
 		}
-		uint256 board = (amount * boardCommision) / 10000;
+		uint256 EOODAmount = (amount * EOODPercentage) / 10000;
+		IERC20(token).transferFrom(user, bnqEOOD, EOODAmount);
+		uint256 techAmount = (amount * techJSCPercentage) / 10000;
+		IERC20(token).transferFrom(user, bnqTechJSC, techAmount);
+		uint256 salesAmount = (amount * salesPercentage) / 10000;
+		IERC20(token).transferFrom(user, salesWallet, salesAmount);
+		uint256 marketingAmount = (amount * marketingJSCPercentage) / 10000;
+		IERC20(token).transferFrom(user, bnqMarketingJSC, marketingAmount);
+		uint256 board = (amount * boardPercentage) / 10000;
 		IERC20(token).transferFrom(user, boardWallet, board);
-		uint256 treasuryAmount = (amount * treasuryPercentage) / 10000;
-		IERC20(token).transferFrom(user, treasury, treasuryAmount);
-		uint256 liquidityAmount = (amount * liquidityPercentage) / 10000;
-		IERC20(token).transferFrom(user, liquidity, liquidityAmount);
-		uint256 marketingAmount = (amount * marketingPercentage) / 10000;
-		IERC20(token).transferFrom(user, marketing, marketingAmount);
-		uint256 referalTotalAmount = (amount * referalTotal) / 10000;
+		uint256 referalTotalAmount = (amount * affiliatePercentage) / 10000;
 		uint256 referalAmount = distributeToken(user, amount, token);
 		if (referalTotalAmount > referalAmount) {
 			IERC20(token).transferFrom(user, topAccount, referalTotalAmount - referalAmount);
@@ -1061,7 +1102,32 @@ contract BanqiroTokenICO is Ownable {
 	}
 
 	function distributeSeedSaleRevenue(uint256 amount, address user, address token) private {
-		uint256 pool = (amount * referalPool) / 10000;
+		
+		uint256 EOODAmount = (amount * seedEOODPercentage) / 10000;
+		IERC20(token).transferFrom(user, bnqEOOD, EOODAmount);
+		uint256 techAmount = (amount * seedTechJSCPercentage) / 10000;
+		IERC20(token).transferFrom(user, bnqTechJSC, techAmount);
+		uint256 marketingAmount = (amount * seedMarketingJSCPercentage) / 10000;
+		IERC20(token).transferFrom(user, bnqMarketingJSC, marketingAmount);
+		uint256 referalTotalAmount = (amount * seedAffiliatePercentage) / 10000;
+		uint256 referalAmount;
+		if (Referal(referalContract).getReferrer(user)!= address(0)) {
+				if(getLevelsUnlocked(Referal(referalContract).getReferrer(user)) >= 1){
+                IERC20(token).transferFrom(user, Referal(referalContract).getReferrer(user), amount*(levelToCommision[1])/10000);
+                 referalIncome[Referal(referalContract).getReferrer(user)] += amount*(levelToCommision[1])/10000;
+                 rewardFromUser[Referal(referalContract).getReferrer(user)][user] = amount*(levelToCommision[1])/10000;
+                 emit ReferalIncomeDistributed(user,  Referal(referalContract).getReferrer(user),amount,
+                 amount*(levelToCommision[1])/10000,1);
+                 referalAmount = amount*(levelToCommision[1])/10000;
+				}	
+		}
+		if (referalTotalAmount > referalAmount) {
+			IERC20(token).transferFrom(user, topAccount, referalTotalAmount - referalAmount);
+		}
+	}
+
+		function distributeBonusRevenue(uint256 amount, address user, address token) private {
+		uint256 pool = (amount * poolPercentage) / 10000;
 		if(token == usdt){
 		  IERC20(token).transferFrom(user, address(this), pool);
 		  uint256 poolBusd = swapUsdtForBusd(pool);
@@ -1071,20 +1137,23 @@ contract BanqiroTokenICO is Ownable {
           poolAmount += pool;
 		  IERC20(token).transferFrom(user, address(this), pool);
 		}
-		uint256 board = (amount * boardCommision) / 10000;
+		uint256 EOODAmount = (amount * bonusEOODPercentage) / 10000;
+		IERC20(token).transferFrom(user, bnqEOOD, EOODAmount);
+		uint256 techAmount = (amount * bonusTechJSCPercentage) / 10000;
+		IERC20(token).transferFrom(user, bnqTechJSC, techAmount);
+		uint256 salesAmount = (amount * bonusSalesPercentage) / 10000;
+		IERC20(token).transferFrom(user, salesWallet, salesAmount);
+		uint256 marketingAmount = (amount * bonusMarketingJSCPercentage) / 10000;
+		IERC20(token).transferFrom(user, bnqMarketingJSC, marketingAmount);
+		uint256 board = (amount * bonusBoardPercentage) / 10000;
 		IERC20(token).transferFrom(user, boardWallet, board);
-		uint256 treasuryAmount = (amount * treasuryPercentage) / 10000;
-		IERC20(token).transferFrom(user, treasury, treasuryAmount);
-		uint256 liquidityAmount = (amount * liquidityPercentage) / 10000;
-		IERC20(token).transferFrom(user, liquidity, liquidityAmount);
-		uint256 marketingAmount = (amount * marketingPercentage) / 10000;
-		IERC20(token).transferFrom(user, marketing, marketingAmount);
-		uint256 referalTotalAmount = (amount * referalTotal) / 10000;
+		uint256 referalTotalAmount = (amount * affiliatePercentage) / 10000;
 		uint256 referalAmount = distributeToken(user, amount, token);
 		if (referalTotalAmount > referalAmount) {
 			IERC20(token).transferFrom(user, topAccount, referalTotalAmount - referalAmount);
 		}
 	}
+
 
     function distributeToken(address user, uint256 amount, address token) public returns(uint256 total){
      uint totalItemCount = 10;
@@ -1205,12 +1274,12 @@ contract BanqiroTokenICO is Ownable {
 		address[] memory getRefrees = Referal(referalContract).getAllRefrees(user);
 		uint256 total = getRefrees.length;
 		for (uint256 i = 0; i < total; i++) {
-			if (usdInvestedByUser[getRefrees[i]] > usdInvestedByUser[highest]) {
+			if (totalUsdInvestedByUser[getRefrees[i]] > totalUsdInvestedByUser[highest]) {
 				highest = getRefrees[i];
 				otherAmount += highestAmount;
-				highestAmount = usdInvestedByUser[getRefrees[i]];
+				highestAmount = totalUsdInvestedByUser[getRefrees[i]];
 			} else {
-				otherAmount += usdInvestedByUser[getRefrees[i]];
+				otherAmount += totalUsdInvestedByUser[getRefrees[i]];
 			}
 
 		}
@@ -1261,7 +1330,7 @@ contract BanqiroTokenICO is Ownable {
 			for (uint256 j = 0; j < totalUsers; j++) {
 				(uint256 amount, , , ) = getEligibleAmount(investors[j]);
 				if (amount >= poolToSale[i]) {
-					uint256 userAmount = ((usdInvestedByUser[investors[j]]) * poolShare) / amountRaised;
+					uint256 userAmount = ((totalUsdInvestedByUser[investors[j]]) * poolShare) / amountRaised;
 					IERC20(busd).transfer(investors[j], userAmount);
 					poolAmountDistributed += userAmount;
 					poolReward[investors[j]] += userAmount;
@@ -1290,7 +1359,7 @@ contract BanqiroTokenICO is Ownable {
 	function getTotalSales() external view returns(uint256 sales) {
 		uint256 totalUsers = investors.length;
 		for (uint256 i = 0; i < totalUsers; i++) {
-			sales += usdInvestedByUser[investors[i]];
+			sales += totalUsdInvestedByUser[investors[i]];
 		}
 	}
 
