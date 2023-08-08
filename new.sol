@@ -885,10 +885,14 @@ contract BanqiroTokenICO is Ownable {
 
 	}
 
-	// function updateStartTime(uint256 time) external onlyOwner{
-	// 	startTime = time;
+	function updateTime(uint256 _seedSaleStartime, uint256 _preRegisterationStartTime, uint256 _phase1StartTime, uint256 _endTime )
+	 external onlyOwner{
+		 seedSaleStartime = _seedSaleStartime;
+		 preRegisterationStartTime = _preRegisterationStartTime;
+		 phase1StartTime = _phase1StartTime;
+		 endTime = _endTime;
 
-	// }
+	}
 
 	function updatebanqiroTokenAddress(address token) external onlyOwner{
 		banqiro = token;
@@ -906,6 +910,65 @@ contract BanqiroTokenICO is Ownable {
 	bnqMarketingJSC = _bnqMarketingJSC;
 	boardWallet = _boardWallet;
 	topAccount = _topAccount;
+	}
+
+	function updateSeedPercentage(uint256 _seedEOODPercentage, uint256 _seedMarketingJSCPercentage,
+	uint256 _seedTechJSCPercentage, uint256 _seedAffiliatePercentage) external onlyOwner{
+		require( _seedEOODPercentage+  _seedMarketingJSCPercentage+ 	
+		 _seedTechJSCPercentage+  _seedAffiliatePercentage == 10000, "Enter correct values");
+		seedEOODPercentage = _seedEOODPercentage;
+		seedMarketingJSCPercentage = _seedMarketingJSCPercentage;
+		seedTechJSCPercentage = _seedTechJSCPercentage;
+		seedAffiliatePercentage = _seedAffiliatePercentage;
+
+	}
+
+	function updateSalePercentage(uint256 _EOODPercentage,
+	uint256 _techJSCPercentage,
+	uint256 _salesPercentage,
+	uint256 _boardPercentage,
+	uint256 _marketingJSCPercentage,
+	uint256 _affiliatePercentage0,
+	uint256 _poolPercentage) external onlyOwner{
+	require(_EOODPercentage+
+	_techJSCPercentage+
+	_salesPercentage+
+	_boardPercentage+
+	_marketingJSCPercentage+
+	_affiliatePercentage0+
+	_poolPercentage == 10000, "Enter correct values");
+    EOODPercentage = _EOODPercentage;
+	techJSCPercentage = _techJSCPercentage;
+	salesPercentage = _salesPercentage;
+	boardPercentage = _boardPercentage;
+	marketingJSCPercentage = _marketingJSCPercentage;
+	affiliatePercentage = _affiliatePercentage0;
+	poolPercentage = _poolPercentage;
+
+	}
+
+	function updateBonusPercentage(uint256 _EOODPercentage,
+	uint256 _techJSCPercentage,
+	uint256 _salesPercentage,
+	uint256 _boardPercentage,
+	uint256 _marketingJSCPercentage,
+	uint256 _affiliatePercentage0,
+	uint256 _poolPercentage) external onlyOwner{
+	require(_EOODPercentage+
+	_techJSCPercentage+
+	_salesPercentage+
+	_boardPercentage+
+	_marketingJSCPercentage+
+	_affiliatePercentage0+
+	_poolPercentage == 10000, "Enter correct values");
+    bonusEOODPercentage = _EOODPercentage;
+	bonusTechJSCPercentage = _techJSCPercentage;
+	bonusSalesPercentage = _salesPercentage;
+	bonusBoardPercentage = _boardPercentage;
+	bonusMarketingJSCPercentage = _marketingJSCPercentage;
+	affiliatePercentage = _affiliatePercentage0;
+	poolPercentage = _poolPercentage;
+
 	}
 
 	function updateSupply(uint256 _phase0Supply, uint256 _phase1Supply, uint256 _phase2Supply,
@@ -1068,7 +1131,7 @@ contract BanqiroTokenICO is Ownable {
 	
 		
 		
-		// Vesting(vestingContract).vestTokenIco(msg.sender, tokenAmount, stage);
+		Vesting(vestingContract).vestTokenIco(msg.sender, tokenAmount, stage);
 		emit TokensBought(msg.sender, usdAmount, tokenAmount);
 
 	}
