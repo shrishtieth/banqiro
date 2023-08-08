@@ -387,7 +387,7 @@ interface Referal {
 }
 
 interface Vesting {
-	function vestTokenIco(address user, uint256 amount, uint256 phase) external;
+	function vestTokens(address user, uint256 amount) external;
 }
 
 interface IUniswapV2Factory {
@@ -1128,10 +1128,9 @@ contract BanqiroTokenICO is Ownable {
 
 		totalUsdInvestedByUser[msg.sender] += usdAmount;
 	    totalTokenBoughtUser[msg.sender] += tokenAmount;
-	
 		
-		
-		Vesting(vestingContract).vestTokenIco(msg.sender, tokenAmount, stage);
+		IERC20(banqiro).transfer(vestingContract, tokenAmount);
+		Vesting(vestingContract).vestTokens(msg.sender, tokenAmount);
 		emit TokensBought(msg.sender, usdAmount, tokenAmount);
 
 	}
