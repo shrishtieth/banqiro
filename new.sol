@@ -779,9 +779,11 @@ contract BanqiroTokenICO is Ownable {
 	mapping(address => mapping(address => uint256)) public rewardFromUser;
 
 
+	uint256 public minBuyAmount = 50000000000000000000;
+	uint256 public maxBuyAmount = 50000000000000000000000;
 	uint256 public seedSaleBuy = 50000000000000000000000;
-	uint256 public firstBuyAmount = 50000000000000000000; //###
-	uint256 public maxPurchase = 50000000000000000000000;
+	uint256 public preRegisterationBuyAmount = 50000000000000000000; //###
+	uint256 public maxPurchaseByUser = 50000000000000000000000;
 	uint256 public phase0Price = 130000000000000000;
 	uint256 public phase1Price = 150000000000000000; //0.01
 	uint256 public phase2Price = 180000000000000000;
@@ -791,7 +793,7 @@ contract BanqiroTokenICO is Ownable {
 	uint256 public phase6Price = 265000000000000000;
 	uint256 public poolAmount;
 	uint256 public poolAmountDistributed; //###
-	uint256 public unlockPrice = 100000000000000000000;
+	uint256 public unlockPrice = 50000000000000000000;
 
 	mapping(uint256 => uint256) public levelToCommision;
 	mapping(uint256 => uint256) public poolToSale;
@@ -852,6 +854,8 @@ contract BanqiroTokenICO is Ownable {
 		uint256 referalAmount, uint256 level);
 
 	event WhitelistUpdated(address user, bool isWhitelisted);
+
+	event BuyAmountUpdated(uint256 min, uint256 max);
 
 
 	constructor(
@@ -1001,9 +1005,17 @@ contract BanqiroTokenICO is Ownable {
 	}
 
 	function updatePurchaseValue(uint256 minAmount, uint256 maxAmount) external onlyOwner {
-		firstBuyAmount = minAmount;
-		maxPurchase = maxAmount;
+		preRegisterationBuyAmount = minAmount;
+		maxPurchaseByUser = maxAmount;
 
+	}
+
+
+	function updateMinMaxBuy(uint256 min, uint256 max) external onlyOwner{
+        minBuyAmount = min;
+		maxBuyAmount = max;
+
+		emit BuyAmountUpdated(min, max);
 	}
 
 
@@ -1048,7 +1060,6 @@ contract BanqiroTokenICO is Ownable {
 			investors.push(msg.sender);
 		}
 		require(token == usdt || token == busd, "Invalid currency");
-		require(amount >= firstBuyAmount, "User should invest atleast 50$");
 		require(block.timestamp > seedSaleStartime,"Sale not started");
 		require(block.timestamp < endTime, "Sale Ended");
 		uint256 stage = getStage();
@@ -1064,7 +1075,7 @@ contract BanqiroTokenICO is Ownable {
 
 			}
 			else{
-				require(preRegisterationUsdInvestedByUser[msg.sender] + amount <= firstBuyAmount, "50 worth of tokens bought");
+				require(preRegisterationUsdInvestedByUser[msg.sender] + amount <= preRegisterationBuyAmount, "50 worth of tokens bought");
                 preRegisterationUsdInvestedByUser[msg.sender] += amount;      
 			}
 		}
@@ -1085,13 +1096,13 @@ contract BanqiroTokenICO is Ownable {
 		}
 		// uint256 tokenAmount = getTokensForPrice(amount, price);
 		uint256 tokenAmount = amount/price;
-		uint256 usdAmount = amount;
-		require(usdAmount >= firstBuyAmount, "Cannot buy below $50"); //###
+		require(amount >= minBuyAmount, "Cannot buy less than minimum Buy Amount"); //###
+		require(amount <= maxBuyAmount, "Cannot buy more than Max Buy Amount");
 		if(stage == 0){
            tokenSoldSeedSale += tokenAmount;
 		   require(tokenSoldSeedSale <= phase0Supply, "Seed Phase sold out"); 
-		   seedSaleAmountRaised += usdAmount;
-		   seedSaleUsdInvestedByUser[msg.sender] += usdAmount;
+		   seedSaleAmountRaised += amount;
+		   seedSaleUsdInvestedByUser[msg.sender] += amount;
            seedSaleTokenBoughtUser[msg.sender] += tokenAmount;
 		   if (token == busd) {
 			distributeSeedSaleRevenue(amount, msg.sender ,busd);
@@ -1101,10 +1112,10 @@ contract BanqiroTokenICO is Ownable {
 		}
 		else if(stage >= 1 && stage <= 4){
            tokensSold += tokenAmount;
-	       amountRaised += usdAmount;
-		   saleUsdInvestedByUser[msg.sender] += usdAmount;
+	       amountRaised += amount;
+		   saleUsdInvestedByUser[msg.sender] += amount;
            saleTokenBoughtUser[msg.sender] += tokenAmount;
-		   require(saleUsdInvestedByUser[msg.sender] <= maxPurchase, "Cannot Purchase more than $50.000 worth of token");
+		   require(saleUsdInvestedByUser[msg.sender] <= maxPurchaseByUser, "Cannot Purchase more than $50.000 worth of token");
 		   if (token == busd) {
 			distributeRevenue(amount, msg.sender ,busd);
 	    	} else if (token == usdt) {
@@ -1114,10 +1125,10 @@ contract BanqiroTokenICO is Ownable {
 		else{
 		   tokensSold += tokenAmount;
 		   require(tokensSold <= phase6Supply, "SOLD OUT!!"); //###
-	       amountRaised += usdAmount;
-		   bonusSaleUsdInvestedByUser[msg.sender] += usdAmount;
+	       amountRaised += amount;
+		   bonusSaleUsdInvestedByUser[msg.sender] += amount;
            bonusTokenBoughtUser[msg.sender] += tokenAmount;
-           require(bonusSaleUsdInvestedByUser[msg.sender] <= maxPurchase, 
+           require(bonusSaleUsdInvestedByUser[msg.sender] <= maxPurchaseByUser, 
 		   "Cannot Purchase more than $50.000 worth of token in bonus Sale");
 		   if (token == busd) {
 			distributeBonusRevenue(amount, msg.sender ,busd);
@@ -1126,12 +1137,12 @@ contract BanqiroTokenICO is Ownable {
 		    }
 		}
 
-		totalUsdInvestedByUser[msg.sender] += usdAmount;
+		totalUsdInvestedByUser[msg.sender] += amount;
 	    totalTokenBoughtUser[msg.sender] += tokenAmount;
 		
 		IERC20(banqiro).transfer(vestingContract, tokenAmount);
 		Vesting(vestingContract).vestTokens(msg.sender, tokenAmount);
-		emit TokensBought(msg.sender, usdAmount, tokenAmount);
+		emit TokensBought(msg.sender, amount, tokenAmount);
 
 	}
 
