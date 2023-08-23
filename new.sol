@@ -740,7 +740,71 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
 	) external;
 }
 
-contract BanqiroTokenICO is Ownable {
+abstract contract ReentrancyGuard {
+    // Booleans are more expensive than uint256 or any type that takes up a full
+    // word because each write operation emits an extra SLOAD to first read the
+    // slot's contents, replace the bits taken up by the boolean, and then write
+    // back. This is the compiler's defense against contract upgrades and
+    // pointer aliasing, and it cannot be disabled.
+
+    // The values being non-zero value makes deployment a bit more expensive,
+    // but in exchange the refund on every call to nonReentrant will be lower in
+    // amount. Since refunds are capped to a percentage of the total
+    // transaction's gas, it is best to keep them low in cases like this one, to
+    // increase the likelihood of the full refund coming into effect.
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+
+    uint256 private _status;
+
+    /**
+     * @dev Unauthorized reentrant call.
+     */
+    error ReentrancyGuardReentrantCall();
+
+    constructor() {
+        _status = _NOT_ENTERED;
+    }
+
+    /**
+     * @dev Prevents a contract from calling itself, directly or indirectly.
+     * Calling a `nonReentrant` function from another `nonReentrant`
+     * function is not supported. It is possible to prevent this from happening
+     * by making the `nonReentrant` function external, and making it call a
+     * `private` function that does the actual work.
+     */
+    modifier nonReentrant() {
+        _nonReentrantBefore();
+        _;
+        _nonReentrantAfter();
+    }
+
+    function _nonReentrantBefore() private {
+        // On the first call to nonReentrant, _status will be _NOT_ENTERED
+        if (_status == _ENTERED) {
+            revert ReentrancyGuardReentrantCall();
+        }
+
+        // Any calls to nonReentrant after this point will fail
+        _status = _ENTERED;
+    }
+
+    function _nonReentrantAfter() private {
+        // By storing the original value once again, a refund is triggered (see
+        // https://eips.ethereum.org/EIPS/eip-2200)
+        _status = _NOT_ENTERED;
+    }
+
+    /**
+     * @dev Returns true if the reentrancy guard is currently set to "entered", which indicates there is a
+     * `nonReentrant` function in the call stack.
+     */
+    function _reentrancyGuardEntered() internal view returns (bool) {
+        return _status == _ENTERED;
+    }
+}
+
+contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	using SafeMath for uint256;
 
 	address public banqiro = 0x5C85F56e8D5Fde19C94cc32CC7a8135a63F864a0;
@@ -757,7 +821,7 @@ contract BanqiroTokenICO is Ownable {
 	address public busd = 0xf8B8dEF2Eb952156F8f97E91d6A183953622E6D1;
 	address public usdt = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
 	address[] public investors;
-	IUniswapV2Router02 public uniswapV2Router; // uniswap dex router
+	IUniswapV2Router02 public immutable uniswapV2Router; // uniswap dex router
 
     uint256 public phase0Supply = 3846154000000000000000000;
 	uint256 public phase1Supply = 4500000000000000000000000;
@@ -1056,7 +1120,7 @@ contract BanqiroTokenICO is Ownable {
 		}
 	}
 
-	function buyToken(address token, uint256 amount) external {
+	function buyToken(address token, uint256 amount) external nonReentrant {
 		if (!added[msg.sender]) {
 			investors.push(msg.sender);
 		}
@@ -1229,7 +1293,7 @@ contract BanqiroTokenICO is Ownable {
 	}
 
 
-    function distributeToken(address user, uint256 amount, address token) public returns(uint256 total){
+    function distributeToken(address user, uint256 amount, address token) private returns(uint256 total){
      uint totalItemCount = 10;
      address _user = user;
         for (uint i = 1; i <= totalItemCount; i++) {
@@ -1414,7 +1478,7 @@ contract BanqiroTokenICO is Ownable {
 		}
 	}
 
-	function swapUsdtForBusd(uint256 usdtAmount) public payable returns(uint256 busdAmount) {
+	function swapUsdtForBusd(uint256 usdtAmount) private returns(uint256 busdAmount) {
 
 		address[] memory path = new address[](2);
 		path[0] = usdt;
