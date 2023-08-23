@@ -230,7 +230,7 @@ library Counters {
     }
 
     function vestTokens(address user, uint256 amount) public {
-        // require(allowedToCall[msg.sender],"Access Denied");
+        require(allowedToCall[msg.sender],"Access Denied");
          if(added[user] == false){
            allUsers.push(user);
            added[user] = true;
