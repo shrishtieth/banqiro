@@ -1020,6 +1020,7 @@ contract BanqiroTokenICO is Ownable {
 
 
 	function updateLevelToCommision(uint256 level, uint256 commision) external onlyOwner{
+		require(level >= 1 && level <= 10, "Only 10 levels allowed");
 		levelToCommision[level] = commision;
 	}
 
