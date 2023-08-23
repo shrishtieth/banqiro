@@ -215,7 +215,18 @@ library Counters {
     constructor(address token) {
        banqiroToken = token;
     
+    }
 
+    function updatebanqiroTokenAddress(address token) external onlyOwner{
+		banqiroToken = token;
+	}
+
+    function setPreSaleEnd(uint256 endTime) external  onlyOwner{
+        preSaleEnd = endTime;
+    }
+
+    function updateCliff(uint256 _cliff) external onlyOwner{
+        cliff = _cliff;
     }
 
     function vestTokens(address user, uint256 amount) public {
@@ -231,9 +242,11 @@ library Counters {
 
     function withdrawTokens() external{
         uint256 unlockedAmount = getUserUnlockedAmount(msg.sender);
-        if(unlockedAmount - userVestedAmount[msg.sender] > 0){
-            IERC20(banqiroToken).transfer(msg.sender, unlockedAmount - userVestedAmount[msg.sender]);
-            emit Unvested(msg.sender, unlockedAmount - userVestedAmount[msg.sender]);
+        uint256 claimableAmount = unlockedAmount - userClaimedAmount[msg.sender];
+        if(claimableAmount > 0){
+            IERC20(banqiroToken).transfer(msg.sender, claimableAmount);
+            userClaimedAmount[msg.sender] = claimableAmount;
+            emit Unvested(msg.sender, claimableAmount);
         }
 
     }
@@ -288,7 +301,9 @@ library Counters {
         allowedToCall[user] = allowed;
     }
 
-
-
+    function withdrawTokens(IERC20 token, address wallet) external onlyOwner {
+		uint256 balanceOfContract = token.balanceOf(address(this));
+		token.transfer(wallet, balanceOfContract);
+	}
 
 }
