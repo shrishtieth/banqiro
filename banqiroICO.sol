@@ -859,6 +859,8 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	uint256 public poolAmount;
 	uint256 public poolAmountDistributed; //###
 	uint256 public unlockPrice = 50000000000000000000;
+	uint256 public sepaCommision = 77000000000000000;
+	address public sepaWallet;
 
 	mapping(uint256 => uint256) public levelToCommision;
 	mapping(uint256 => uint256) public poolToSale;
@@ -972,13 +974,14 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		address _salesWallet,
 		address _bnqMarketingJSC,
 		address _boardWallet,
-		address _topAccount) external onlyOwner {
+		address _topAccount, address _sepaWallet) external onlyOwner {
 		bnqEOOD = _bnqEOOD;
 		bnqTechJSC = _bnqTechJSC;
 		salesWallet = _salesWallet;
 		bnqMarketingJSC = _bnqMarketingJSC;
 		boardWallet = _boardWallet;
 		topAccount = _topAccount;
+		sepaWallet = _sepaWallet;
 	}
 
 	function updateSeedPercentage(uint256 _seedEOODPercentage, uint256 _seedMarketingJSCPercentage,
@@ -989,6 +992,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		seedMarketingJSCPercentage = _seedMarketingJSCPercentage;
 		seedTechJSCPercentage = _seedTechJSCPercentage;
 		seedAffiliatePercentage = _seedAffiliatePercentage;
+		
 
 	}
 
@@ -997,22 +1001,23 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		uint256 _salesPercentage,
 		uint256 _boardPercentage,
 		uint256 _marketingJSCPercentage,
-		uint256 _affiliatePercentage0,
+		uint256 _affiliatePercentage,
 		uint256 _poolPercentage) external onlyOwner {
 		require(_EOODPercentage +
 			_techJSCPercentage +
 			_salesPercentage +
 			_boardPercentage +
 			_marketingJSCPercentage +
-			_affiliatePercentage0 +
+			_affiliatePercentage +
 			_poolPercentage == 10000, "Enter correct values");
 		EOODPercentage = _EOODPercentage;
 		techJSCPercentage = _techJSCPercentage;
 		salesPercentage = _salesPercentage;
 		boardPercentage = _boardPercentage;
 		marketingJSCPercentage = _marketingJSCPercentage;
-		affiliatePercentage = _affiliatePercentage0;
+		affiliatePercentage = _affiliatePercentage;
 		poolPercentage = _poolPercentage;
+		
 
 	}
 
@@ -1021,23 +1026,22 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		uint256 _salesPercentage,
 		uint256 _boardPercentage,
 		uint256 _marketingJSCPercentage,
-		uint256 _affiliatePercentage0,
+		uint256 _affiliatePercentage,
 		uint256 _poolPercentage) external onlyOwner {
 		require(_EOODPercentage +
 			_techJSCPercentage +
 			_salesPercentage +
 			_boardPercentage +
 			_marketingJSCPercentage +
-			_affiliatePercentage0 +
+			_affiliatePercentage +
 			_poolPercentage == 10000, "Enter correct values");
 		bonusEOODPercentage = _EOODPercentage;
 		bonusTechJSCPercentage = _techJSCPercentage;
 		bonusSalesPercentage = _salesPercentage;
 		bonusBoardPercentage = _boardPercentage;
 		bonusMarketingJSCPercentage = _marketingJSCPercentage;
-		affiliatePercentage = _affiliatePercentage0;
+		affiliatePercentage = _affiliatePercentage;
 		poolPercentage = _poolPercentage;
-
 	}
 
 	function updateSupply(uint256 _phase0Supply, uint256 _phase1Supply, uint256 _phase2Supply,
@@ -1218,7 +1222,8 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		uint256 EOODAmount = (amount * EOODPercentage) / 10000;
 		IERC20(token).transferFrom(user, bnqEOOD, EOODAmount);
 		uint256 techAmount = (amount * techJSCPercentage) / 10000;
-		IERC20(token).transferFrom(user, bnqTechJSC, techAmount);
+		IERC20(token).transferFrom(user, sepaWallet, sepaCommision);
+		IERC20(token).transferFrom(user, bnqTechJSC, techAmount - sepaCommision);
 		uint256 salesAmount = (amount * salesPercentage) / 10000;
 		IERC20(token).transferFrom(user, salesWallet, salesAmount);
 		uint256 marketingAmount = (amount * marketingJSCPercentage) / 10000;
@@ -1237,7 +1242,8 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		uint256 EOODAmount = (amount * seedEOODPercentage) / 10000;
 		IERC20(token).transferFrom(user, bnqEOOD, EOODAmount);
 		uint256 techAmount = (amount * seedTechJSCPercentage) / 10000;
-		IERC20(token).transferFrom(user, bnqTechJSC, techAmount);
+		IERC20(token).transferFrom(user, sepaWallet, sepaCommision);
+		IERC20(token).transferFrom(user, bnqTechJSC, techAmount - sepaCommision);
 		uint256 marketingAmount = (amount * seedMarketingJSCPercentage) / 10000;
 		IERC20(token).transferFrom(user, bnqMarketingJSC, marketingAmount);
 		uint256 referalTotalAmount = (amount * seedAffiliatePercentage) / 10000;
@@ -1270,7 +1276,8 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		uint256 EOODAmount = (amount * bonusEOODPercentage) / 10000;
 		IERC20(token).transferFrom(user, bnqEOOD, EOODAmount);
 		uint256 techAmount = (amount * bonusTechJSCPercentage) / 10000;
-		IERC20(token).transferFrom(user, bnqTechJSC, techAmount);
+		IERC20(token).transferFrom(user, sepaWallet, sepaCommision);
+		IERC20(token).transferFrom(user, bnqTechJSC, techAmount - sepaCommision);
 		uint256 salesAmount = (amount * bonusSalesPercentage) / 10000;
 		IERC20(token).transferFrom(user, salesWallet, salesAmount);
 		uint256 marketingAmount = (amount * bonusMarketingJSCPercentage) / 10000;
@@ -1283,7 +1290,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			IERC20(token).transferFrom(user, topAccount, referalTotalAmount - referalAmount);
 		}
 	}
-
+ 
 
 	function distributeToken(address user, uint256 amount, address token) private returns(uint256 total) {
 		uint totalItemCount = 10;
