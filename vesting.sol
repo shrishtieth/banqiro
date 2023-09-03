@@ -201,7 +201,7 @@
     	address public banqiroToken;
     	uint256 public totalTokensVested;
     	uint256 public totalTokensUnvested;
-    	uint256 public preSaleEnd;
+    	uint256 public preSaleEnd = 1677983961 ;
     	uint256 public cliff = 15780000;
 
     	address[] public allUsers;
@@ -252,44 +252,103 @@
 
     	}
 
+		function getMonth() external  view returns (uint256 months){
+			return((block.timestamp - (preSaleEnd + cliff)) / 2592000);
+		}
+
     	function getUserUnlockedAmount(address user) public view returns(uint256 amount) {
 
-    		if (block.timestamp < preSaleEnd + cliff || block.timestamp - (preSaleEnd + cliff) % 2630000 < 1) {
-    			amount = 0;
-    		} else if (block.timestamp - (preSaleEnd + cliff) % 2630000 >= 1 && block.timestamp - (preSaleEnd + cliff) % 2630000 < 7) {
-    			uint256 months = block.timestamp - (preSaleEnd + cliff) % 2630000;
-    			amount = (200 * userVestedAmount[user] * months) / 10000;
+    		if (block.timestamp < preSaleEnd + cliff || (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 1) {
+				uint256 currentBlock = getMonthBlock(((block.timestamp - (preSaleEnd + cliff)) / 2592000) + 1);
+				uint256 blockAmount = (currentBlock * ((200 * userVestedAmount[user]) / 10000))/864000;
+    			amount = 0 + blockAmount;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 1 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 7) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+				uint256 currentBlock = getMonthBlock(months + 1);
+				uint256 blockAmount;
+				if(months == 6){
+                blockAmount = (currentBlock * ((225 * userVestedAmount[user]) / 10000))/864000;
+				}
+				else{
+				blockAmount = (currentBlock * ((200 * userVestedAmount[user]) / 10000))/864000;
+				}
+    			amount = ((200 * userVestedAmount[user] * months) / 10000) + blockAmount ;
 
-    		} else if (block.timestamp - (preSaleEnd + cliff) % 2630000 >= 7 && block.timestamp - (preSaleEnd + cliff) % 2630000 < 13) {
-    			uint256 months = block.timestamp - (preSaleEnd + cliff) % 2630000;
-    			amount = ((1200 + (225 * (months - 6))) * userVestedAmount[user]) / 10000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 7 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 13) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+				uint256 currentBlock = getMonthBlock(months + 1);
+				uint256 blockAmount;
+				if(months == 12){
+                blockAmount = (currentBlock * ((275 * userVestedAmount[user]) / 10000))/864000;
+				}
+				else{
+				blockAmount = (currentBlock * ((225 * userVestedAmount[user]) / 10000))/864000;
+				}
+    			amount = (((1200 + (225 * (months - 6))) * userVestedAmount[user]) / 10000) + blockAmount;
 
-    		} else if (block.timestamp - (preSaleEnd + cliff) % 2630000 >= 13 && block.timestamp - (preSaleEnd + cliff) % 2630000 < 19) {
-    			uint256 months = block.timestamp - (preSaleEnd + cliff) % 2630000;
-    			amount = ((2550 + (275 * (months - 12))) * userVestedAmount[user]) / 10000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 13 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 19) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+				uint256 currentBlock = getMonthBlock(months + 1);
+				uint256 blockAmount;
+				if(months == 18){
+                blockAmount = (currentBlock * ((300 * userVestedAmount[user]) / 10000))/864000;
+				}
+				else{
+				blockAmount = (currentBlock * ((275 * userVestedAmount[user]) / 10000))/864000;
+				}
+    			amount = (((2550 + (275 * (months - 12))) * userVestedAmount[user]) / 10000) + blockAmount;
 
-    		} else if (block.timestamp - (preSaleEnd + cliff) % 2630000 >= 19 && block.timestamp - (preSaleEnd + cliff) % 2630000 < 25) {
-    			uint256 months = block.timestamp - (preSaleEnd + cliff) % 2630000;
-    			amount = ((4200 + (300 * (months - 18))) * userVestedAmount[user]) / 10000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 19 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 25) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+				uint256 currentBlock = getMonthBlock(months + 1);
+				uint256 blockAmount;
+				if(months == 24){
+                blockAmount = (currentBlock * ((325 * userVestedAmount[user]) / 10000))/864000;
+				}
+				else{
+				blockAmount = (currentBlock * ((300 * userVestedAmount[user]) / 10000))/864000;
+				}
+    			amount = (((4200 + (300 * (months - 18))) * userVestedAmount[user]) / 10000) + blockAmount;
 
-    		} else if (block.timestamp - (preSaleEnd + cliff) % 2630000 >= 25 && block.timestamp - (preSaleEnd + cliff) % 2630000 < 31) {
-    			uint256 months = block.timestamp - (preSaleEnd + cliff) % 2630000;
-    			amount = ((6000 + (325 * (months - 24))) * userVestedAmount[user]) / 10000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 25 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 31) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+				uint256 currentBlock = getMonthBlock(months + 1);
+				uint256 blockAmount;
+				if(months == 30){
+                blockAmount = (currentBlock * ((350 * userVestedAmount[user]) / 10000))/864000;
+				}
+				else{
+				blockAmount = (currentBlock * ((325 * userVestedAmount[user]) / 10000))/864000;
+				}
+    			amount = (((6000 + (325 * (months - 24))) * userVestedAmount[user]) / 10000) + blockAmount;
 
-    		} else if (block.timestamp - (preSaleEnd + cliff) % 2630000 >= 31 && block.timestamp - (preSaleEnd + cliff) % 2630000 < 36) {
-    			uint256 months = block.timestamp - (preSaleEnd + cliff) % 2630000;
-    			amount = ((7950 + (350 * (months - 30))) * userVestedAmount[user]) / 10000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 31 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 36) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+				uint256 currentBlock = getMonthBlock(months + 1);
+				uint256 blockAmount;
+				if(months == 35){
+                blockAmount = (currentBlock * ((300 * userVestedAmount[user]) / 10000))/864000;
+				}
+				else{
+				blockAmount = (currentBlock * ((350 * userVestedAmount[user]) / 10000))/864000;
+				}
+    			amount = (((7950 + (350 * (months - 30))) * userVestedAmount[user]) / 10000) + blockAmount;
 
-    		} else if (block.timestamp - (preSaleEnd + cliff) % 2630000 >= 36) {
-    			uint256 months = block.timestamp - (preSaleEnd + cliff) % 2630000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 36) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
     			if (months > 36) {
     				months = 36;
     			}
     			amount = (10000 * userVestedAmount[user]) / 10000;
     		}
 
-
     	}
+
+
+		function getMonthBlock(uint256 month) public view returns(uint256 currentBlock){
+			uint256 monthStart = preSaleEnd + cliff + ((month - 1) * 259200);
+			currentBlock = (block.timestamp - monthStart)/3;
+		}
 
     	function updateAllowed(address user, bool allowed) external onlyOwner {
     		allowedToCall[user] = allowed;
