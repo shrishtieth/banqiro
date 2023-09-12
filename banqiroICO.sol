@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.20;
+pragma solidity 0.8 .20;
 library SafeMath {
 	/**
 	 * @dev Returns the addition of two unsigned integers, with an overflow flag.
@@ -375,306 +375,311 @@ interface IERC20 {
 }
 
 library Address {
-    /**
-     * @dev The ETH balance of the account is not enough to perform the operation.
-     */
-    error AddressInsufficientBalance(address account);
+	/**
+	 * @dev The ETH balance of the account is not enough to perform the operation.
+	 */
+	error AddressInsufficientBalance(address account);
 
-    /**
-     * @dev There's no code at `target` (it is not a contract).
-     */
-    error AddressEmptyCode(address target);
+	/**
+	 * @dev There's no code at `target` (it is not a contract).
+	 */
+	error AddressEmptyCode(address target);
 
-    /**
-     * @dev A call to an address target failed. The target may have reverted.
-     */
-    error FailedInnerCall();
+	/**
+	 * @dev A call to an address target failed. The target may have reverted.
+	 */
+	error FailedInnerCall();
 
-    /**
-     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to
-     * `recipient`, forwarding all available gas and reverting on errors.
-     *
-     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
-     * of certain opcodes, possibly making contracts go over the 2300 gas limit
-     * imposed by `transfer`, making them unable to receive funds via
-     * `transfer`. {sendValue} removes this limitation.
-     *
-     * https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/[Learn more].
-     *
-     * IMPORTANT: because control is transferred to `recipient`, care must be
-     * taken to not create reentrancy vulnerabilities. Consider using
-     * {ReentrancyGuard} or the
-     * https://solidity.readthedocs.io/en/v0.8.20/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
-     */
-    function sendValue(address payable recipient, uint256 amount) internal {
-        if (address(this).balance < amount) {
-            revert AddressInsufficientBalance(address(this));
-        }
+	/**
+	 * @dev Replacement for Solidity's `transfer`: sends `amount` wei to
+	 * `recipient`, forwarding all available gas and reverting on errors.
+	 *
+	 * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
+	 * of certain opcodes, possibly making contracts go over the 2300 gas limit
+	 * imposed by `transfer`, making them unable to receive funds via
+	 * `transfer`. {sendValue} removes this limitation.
+	 *
+	 * https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/[Learn more].
+	 *
+	 * IMPORTANT: because control is transferred to `recipient`, care must be
+	 * taken to not create reentrancy vulnerabilities. Consider using
+	 * {ReentrancyGuard} or the
+	 * https://solidity.readthedocs.io/en/v0.8.20/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
+	 */
+	function sendValue(address payable recipient, uint256 amount) internal {
+		if (address(this).balance < amount) {
+			revert AddressInsufficientBalance(address(this));
+		}
 
-        (bool success, ) = recipient.call{value: amount}("");
-        if (!success) {
-            revert FailedInnerCall();
-        }
-    }
+		(bool success, ) = recipient.call {
+			value: amount
+		}("");
+		if (!success) {
+			revert FailedInnerCall();
+		}
+	}
 
-    /**
-     * @dev Performs a Solidity function call using a low level `call`. A
-     * plain `call` is an unsafe replacement for a function call: use this
-     * function instead.
-     *
-     * If `target` reverts with a revert reason or custom error, it is bubbled
-     * up by this function (like regular Solidity function calls). However, if
-     * the call reverted with no returned reason, this function reverts with a
-     * {FailedInnerCall} error.
-     *
-     * Returns the raw returned data. To convert to the expected return value,
-     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].
-     *
-     * Requirements:
-     *
-     * - `target` must be a contract.
-     * - calling `target` with `data` must not revert.
-     */
-    function functionCall(address target, bytes memory data) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, 0);
-    }
+	/**
+	 * @dev Performs a Solidity function call using a low level `call`. A
+	 * plain `call` is an unsafe replacement for a function call: use this
+	 * function instead.
+	 *
+	 * If `target` reverts with a revert reason or custom error, it is bubbled
+	 * up by this function (like regular Solidity function calls). However, if
+	 * the call reverted with no returned reason, this function reverts with a
+	 * {FailedInnerCall} error.
+	 *
+	 * Returns the raw returned data. To convert to the expected return value,
+	 * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].
+	 *
+	 * Requirements:
+	 *
+	 * - `target` must be a contract.
+	 * - calling `target` with `data` must not revert.
+	 */
+	function functionCall(address target, bytes memory data) internal returns(bytes memory) {
+		return functionCallWithValue(target, data, 0);
+	}
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but also transferring `value` wei to `target`.
-     *
-     * Requirements:
-     *
-     * - the calling contract must have an ETH balance of at least `value`.
-     * - the called Solidity function must be `payable`.
-     */
-    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {
-        if (address(this).balance < value) {
-            revert AddressInsufficientBalance(address(this));
-        }
-        (bool success, bytes memory returndata) = target.call{value: value}(data);
-        return verifyCallResultFromTarget(target, success, returndata);
-    }
+	/**
+	 * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+	 * but also transferring `value` wei to `target`.
+	 *
+	 * Requirements:
+	 *
+	 * - the calling contract must have an ETH balance of at least `value`.
+	 * - the called Solidity function must be `payable`.
+	 */
+	function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns(bytes memory) {
+		if (address(this).balance < value) {
+			revert AddressInsufficientBalance(address(this));
+		}
+		(bool success, bytes memory returndata) = target.call {
+			value: value
+		}(data);
+		return verifyCallResultFromTarget(target, success, returndata);
+	}
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but performing a static call.
-     */
-    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {
-        (bool success, bytes memory returndata) = target.staticcall(data);
-        return verifyCallResultFromTarget(target, success, returndata);
-    }
+	/**
+	 * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+	 * but performing a static call.
+	 */
+	function functionStaticCall(address target, bytes memory data) internal view returns(bytes memory) {
+		(bool success, bytes memory returndata) = target.staticcall(data);
+		return verifyCallResultFromTarget(target, success, returndata);
+	}
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but performing a delegate call.
-     */
-    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {
-        (bool success, bytes memory returndata) = target.delegatecall(data);
-        return verifyCallResultFromTarget(target, success, returndata);
-    }
+	/**
+	 * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+	 * but performing a delegate call.
+	 */
+	function functionDelegateCall(address target, bytes memory data) internal returns(bytes memory) {
+		(bool success, bytes memory returndata) = target.delegatecall(data);
+		return verifyCallResultFromTarget(target, success, returndata);
+	}
 
-    /**
-     * @dev Tool to verify that a low level call to smart-contract was successful, and reverts if the target
-     * was not a contract or bubbling up the revert reason (falling back to {FailedInnerCall}) in case of an
-     * unsuccessful call.
-     */
-    function verifyCallResultFromTarget(
-        address target,
-        bool success,
-        bytes memory returndata
-    ) internal view returns (bytes memory) {
-        if (!success) {
-            _revert(returndata);
-        } else {
-            // only check if target is a contract if the call was successful and the return data is empty
-            // otherwise we already know that it was a contract
-            if (returndata.length == 0 && target.code.length == 0) {
-                revert AddressEmptyCode(target);
-            }
-            return returndata;
-        }
-    }
+	/**
+	 * @dev Tool to verify that a low level call to smart-contract was successful, and reverts if the target
+	 * was not a contract or bubbling up the revert reason (falling back to {FailedInnerCall}) in case of an
+	 * unsuccessful call.
+	 */
+	function verifyCallResultFromTarget(
+		address target,
+		bool success,
+		bytes memory returndata
+	) internal view returns(bytes memory) {
+		if (!success) {
+			_revert(returndata);
+		} else {
+			// only check if target is a contract if the call was successful and the return data is empty
+			// otherwise we already know that it was a contract
+			if (returndata.length == 0 && target.code.length == 0) {
+				revert AddressEmptyCode(target);
+			}
+			return returndata;
+		}
+	}
 
-    /**
-     * @dev Tool to verify that a low level call was successful, and reverts if it wasn't, either by bubbling the
-     * revert reason or with a default {FailedInnerCall} error.
-     */
-    function verifyCallResult(bool success, bytes memory returndata) internal pure returns (bytes memory) {
-        if (!success) {
-            _revert(returndata);
-        } else {
-            return returndata;
-        }
-    }
+	/**
+	 * @dev Tool to verify that a low level call was successful, and reverts if it wasn't, either by bubbling the
+	 * revert reason or with a default {FailedInnerCall} error.
+	 */
+	function verifyCallResult(bool success, bytes memory returndata) internal pure returns(bytes memory) {
+		if (!success) {
+			_revert(returndata);
+		} else {
+			return returndata;
+		}
+	}
 
-    /**
-     * @dev Reverts with returndata if present. Otherwise reverts with {FailedInnerCall}.
-     */
-    function _revert(bytes memory returndata) private pure {
-        // Look for revert reason and bubble it up if present
-        if (returndata.length > 0) {
-            // The easiest way to bubble the revert reason is using memory via assembly
-            /// @solidity memory-safe-assembly
-            assembly {
-                let returndata_size := mload(returndata)
-                revert(add(32, returndata), returndata_size)
-            }
-        } else {
-            revert FailedInnerCall();
-        }
-    }
+	/**
+	 * @dev Reverts with returndata if present. Otherwise reverts with {FailedInnerCall}.
+	 */
+	function _revert(bytes memory returndata) private pure {
+		// Look for revert reason and bubble it up if present
+		if (returndata.length > 0) {
+			// The easiest way to bubble the revert reason is using memory via assembly
+			/// @solidity memory-safe-assembly
+			assembly {
+				let returndata_size: = mload(returndata)
+				revert(add(32, returndata), returndata_size)
+			}
+		} else {
+			revert FailedInnerCall();
+		}
+	}
 }
 
 interface IERC20Permit {
-    /**
-     * @dev Sets `value` as the allowance of `spender` over ``owner``'s tokens,
-     * given ``owner``'s signed approval.
-     *
-     * IMPORTANT: The same issues {IERC20-approve} has related to transaction
-     * ordering also apply here.
-     *
-     * Emits an {Approval} event.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     * - `deadline` must be a timestamp in the future.
-     * - `v`, `r` and `s` must be a valid `secp256k1` signature from `owner`
-     * over the EIP712-formatted function arguments.
-     * - the signature must use ``owner``'s current nonce (see {nonces}).
-     *
-     * For more information on the signature format, see the
-     * https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP
-     * section].
-     *
-     * CAUTION: See Security Considerations above.
-     */
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
+	/**
+	 * @dev Sets `value` as the allowance of `spender` over ``owner``'s tokens,
+	 * given ``owner``'s signed approval.
+	 *
+	 * IMPORTANT: The same issues {IERC20-approve} has related to transaction
+	 * ordering also apply here.
+	 *
+	 * Emits an {Approval} event.
+	 *
+	 * Requirements:
+	 *
+	 * - `spender` cannot be the zero address.
+	 * - `deadline` must be a timestamp in the future.
+	 * - `v`, `r` and `s` must be a valid `secp256k1` signature from `owner`
+	 * over the EIP712-formatted function arguments.
+	 * - the signature must use ``owner``'s current nonce (see {nonces}).
+	 *
+	 * For more information on the signature format, see the
+	 * https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP
+	 * section].
+	 *
+	 * CAUTION: See Security Considerations above.
+	 */
+	function permit(
+		address owner,
+		address spender,
+		uint256 value,
+		uint256 deadline,
+		uint8 v,
+		bytes32 r,
+		bytes32 s
+	) external;
 
-    /**
-     * @dev Returns the current nonce for `owner`. This value must be
-     * included whenever a signature is generated for {permit}.
-     *
-     * Every successful call to {permit} increases ``owner``'s nonce by one. This
-     * prevents a signature from being used multiple times.
-     */
-    function nonces(address owner) external view returns (uint256);
+	/**
+	 * @dev Returns the current nonce for `owner`. This value must be
+	 * included whenever a signature is generated for {permit}.
+	 *
+	 * Every successful call to {permit} increases ``owner``'s nonce by one. This
+	 * prevents a signature from being used multiple times.
+	 */
+	function nonces(address owner) external view returns(uint256);
 
-    /**
-     * @dev Returns the domain separator used in the encoding of the signature for {permit}, as defined by {EIP712}.
-     */
-    // solhint-disable-next-line func-name-mixedcase
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
+	/**
+	 * @dev Returns the domain separator used in the encoding of the signature for {permit}, as defined by {EIP712}.
+	 */
+	// solhint-disable-next-line func-name-mixedcase
+	function DOMAIN_SEPARATOR() external view returns(bytes32);
 }
 
 library SafeERC20 {
-    using Address for address;
+	using Address
+	for address;
 
-    /**
-     * @dev An operation with an ERC20 token failed.
-     */
-    error SafeERC20FailedOperation(address token);
+	/**
+	 * @dev An operation with an ERC20 token failed.
+	 */
+	error SafeERC20FailedOperation(address token);
 
-    /**
-     * @dev Indicates a failed `decreaseAllowance` request.
-     */
-    error SafeERC20FailedDecreaseAllowance(address spender, uint256 currentAllowance, uint256 requestedDecrease);
+	/**
+	 * @dev Indicates a failed `decreaseAllowance` request.
+	 */
+	error SafeERC20FailedDecreaseAllowance(address spender, uint256 currentAllowance, uint256 requestedDecrease);
 
-    /**
-     * @dev Transfer `value` amount of `token` from the calling contract to `to`. If `token` returns no value,
-     * non-reverting calls are assumed to be successful.
-     */
-    function safeTransfer(IERC20 token, address to, uint256 value) internal {
-        _callOptionalReturn(token, abi.encodeCall(token.transfer, (to, value)));
-    }
+	/**
+	 * @dev Transfer `value` amount of `token` from the calling contract to `to`. If `token` returns no value,
+	 * non-reverting calls are assumed to be successful.
+	 */
+	function safeTransfer(IERC20 token, address to, uint256 value) internal {
+		_callOptionalReturn(token, abi.encodeCall(token.transfer, (to, value)));
+	}
 
-    /**
-     * @dev Transfer `value` amount of `token` from `from` to `to`, spending the approval given by `from` to the
-     * calling contract. If `token` returns no value, non-reverting calls are assumed to be successful.
-     */
-    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
-        _callOptionalReturn(token, abi.encodeCall(token.transferFrom, (from, to, value)));
-    }
+	/**
+	 * @dev Transfer `value` amount of `token` from `from` to `to`, spending the approval given by `from` to the
+	 * calling contract. If `token` returns no value, non-reverting calls are assumed to be successful.
+	 */
+	function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
+		_callOptionalReturn(token, abi.encodeCall(token.transferFrom, (from, to, value)));
+	}
 
-    /**
-     * @dev Increase the calling contract's allowance toward `spender` by `value`. If `token` returns no value,
-     * non-reverting calls are assumed to be successful.
-     */
-    function safeIncreaseAllowance(IERC20 token, address spender, uint256 value) internal {
-        uint256 oldAllowance = token.allowance(address(this), spender);
-        forceApprove(token, spender, oldAllowance + value);
-    }
+	/**
+	 * @dev Increase the calling contract's allowance toward `spender` by `value`. If `token` returns no value,
+	 * non-reverting calls are assumed to be successful.
+	 */
+	function safeIncreaseAllowance(IERC20 token, address spender, uint256 value) internal {
+		uint256 oldAllowance = token.allowance(address(this), spender);
+		forceApprove(token, spender, oldAllowance + value);
+	}
 
-    /**
-     * @dev Decrease the calling contract's allowance toward `spender` by `requestedDecrease`. If `token` returns no value,
-     * non-reverting calls are assumed to be successful.
-     */
-    function safeDecreaseAllowance(IERC20 token, address spender, uint256 requestedDecrease) internal {
-        unchecked {
-            uint256 currentAllowance = token.allowance(address(this), spender);
-            if (currentAllowance < requestedDecrease) {
-                revert SafeERC20FailedDecreaseAllowance(spender, currentAllowance, requestedDecrease);
-            }
-            forceApprove(token, spender, currentAllowance - requestedDecrease);
-        }
-    }
+	/**
+	 * @dev Decrease the calling contract's allowance toward `spender` by `requestedDecrease`. If `token` returns no value,
+	 * non-reverting calls are assumed to be successful.
+	 */
+	function safeDecreaseAllowance(IERC20 token, address spender, uint256 requestedDecrease) internal {
+		unchecked {
+			uint256 currentAllowance = token.allowance(address(this), spender);
+			if (currentAllowance < requestedDecrease) {
+				revert SafeERC20FailedDecreaseAllowance(spender, currentAllowance, requestedDecrease);
+			}
+			forceApprove(token, spender, currentAllowance - requestedDecrease);
+		}
+	}
 
-    /**
-     * @dev Set the calling contract's allowance toward `spender` to `value`. If `token` returns no value,
-     * non-reverting calls are assumed to be successful. Meant to be used with tokens that require the approval
-     * to be set to zero before setting it to a non-zero value, such as USDT.
-     */
-    function forceApprove(IERC20 token, address spender, uint256 value) internal {
-        bytes memory approvalCall = abi.encodeCall(token.approve, (spender, value));
+	/**
+	 * @dev Set the calling contract's allowance toward `spender` to `value`. If `token` returns no value,
+	 * non-reverting calls are assumed to be successful. Meant to be used with tokens that require the approval
+	 * to be set to zero before setting it to a non-zero value, such as USDT.
+	 */
+	function forceApprove(IERC20 token, address spender, uint256 value) internal {
+		bytes memory approvalCall = abi.encodeCall(token.approve, (spender, value));
 
-        if (!_callOptionalReturnBool(token, approvalCall)) {
-            _callOptionalReturn(token, abi.encodeCall(token.approve, (spender, 0)));
-            _callOptionalReturn(token, approvalCall);
-        }
-    }
+		if (!_callOptionalReturnBool(token, approvalCall)) {
+			_callOptionalReturn(token, abi.encodeCall(token.approve, (spender, 0)));
+			_callOptionalReturn(token, approvalCall);
+		}
+	}
 
-    /**
-     * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement
-     * on the return value: the return value is optional (but if data is returned, it must not be false).
-     * @param token The token targeted by the call.
-     * @param data The call data (encoded using abi.encode or one of its variants).
-     */
-    function _callOptionalReturn(IERC20 token, bytes memory data) private {
-        // We need to perform a low level call here, to bypass Solidity's return data size checking mechanism, since
-        // we're implementing it ourselves. We use {Address-functionCall} to perform this call, which verifies that
-        // the target address contains contract code and also asserts for success in the low-level call.
+	/**
+	 * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement
+	 * on the return value: the return value is optional (but if data is returned, it must not be false).
+	 * @param token The token targeted by the call.
+	 * @param data The call data (encoded using abi.encode or one of its variants).
+	 */
+	function _callOptionalReturn(IERC20 token, bytes memory data) private {
+		// We need to perform a low level call here, to bypass Solidity's return data size checking mechanism, since
+		// we're implementing it ourselves. We use {Address-functionCall} to perform this call, which verifies that
+		// the target address contains contract code and also asserts for success in the low-level call.
 
-        bytes memory returndata = address(token).functionCall(data);
-        if (returndata.length != 0 && !abi.decode(returndata, (bool))) {
-            revert SafeERC20FailedOperation(address(token));
-        }
-    }
+		bytes memory returndata = address(token).functionCall(data);
+		if (returndata.length != 0 && !abi.decode(returndata, (bool))) {
+			revert SafeERC20FailedOperation(address(token));
+		}
+	}
 
-    /**
-     * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement
-     * on the return value: the return value is optional (but if data is returned, it must not be false).
-     * @param token The token targeted by the call.
-     * @param data The call data (encoded using abi.encode or one of its variants).
-     *
-     * This is a variant of {_callOptionalReturn} that silents catches all reverts and returns a bool instead.
-     */
-    function _callOptionalReturnBool(IERC20 token, bytes memory data) private returns (bool) {
-        // We need to perform a low level call here, to bypass Solidity's return data size checking mechanism, since
-        // we're implementing it ourselves. We cannot use {Address-functionCall} here since this should return false
-        // and not revert is the subcall reverts.
+	/**
+	 * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement
+	 * on the return value: the return value is optional (but if data is returned, it must not be false).
+	 * @param token The token targeted by the call.
+	 * @param data The call data (encoded using abi.encode or one of its variants).
+	 *
+	 * This is a variant of {_callOptionalReturn} that silents catches all reverts and returns a bool instead.
+	 */
+	function _callOptionalReturnBool(IERC20 token, bytes memory data) private returns(bool) {
+		// We need to perform a low level call here, to bypass Solidity's return data size checking mechanism, since
+		// we're implementing it ourselves. We cannot use {Address-functionCall} here since this should return false
+		// and not revert is the subcall reverts.
 
-        (bool success, bytes memory returndata) = address(token).call(data);
-        return success && (returndata.length == 0 || abi.decode(returndata, (bool))) && address(token).code.length > 0;
-    }
+		(bool success, bytes memory returndata) = address(token).call(data);
+		return success && (returndata.length == 0 || abi.decode(returndata, (bool))) && address(token).code.length > 0;
+	}
 }
 
 interface Referal {
@@ -1104,25 +1109,27 @@ abstract contract ReentrancyGuard {
 }
 
 contract BanqiroTokenICO is Ownable, ReentrancyGuard {
-	using SafeMath for uint256;
-    using SafeERC20 for IERC20;
+	using SafeMath
+	for uint256;
+	using SafeERC20
+	for IERC20;
 
-	address public banqiro = 0x5C85F56e8D5Fde19C94cc32CC7a8135a63F864a0;
-	uint256 public seedSaleStartime;
-    uint256 public slippageTolerance = 1000;
+	address public banqiro = 0x12d7986d10a94224b4c2390E69Ae20ad7D0C4D45;
+	uint256 public seedSaleStartime = 0;
 	uint256 public preRegisterationStartTime;
-	uint256 public phase1StartTime;
-	uint256 public endTime;
+	uint256 public phase1StartTime = 1694009118;
+	uint256 public endTime = 1694181904;
 	uint256 public seedSaleAmountRaised;
 	uint256 public amountRaised;
-	address public referalContract = 0x39bB667955D2DbA945dA814f47685Ab644Af35dd;
-	address public vestingContract = 0x3A987437b545A240079CAa091722239691A0A66D;
+	address public referalContract = 0x64cC5e198d9C623c5cDb2065E6fd7A71f0c3ED41;
+	address public vestingContract = 0xe2473f38f7a6E5280b64679743dFa68d8d17B75A;
 	uint256 public tokenSoldSeedSale;
 	uint256 public tokensSold;
-	address public usdc = 0xf8B8dEF2Eb952156F8f97E91d6A183953622E6D1;
-	address public usdt = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
+	address public usdc = 0x5d7d42d0eDA8A1AEfF73AB1Dc26853A6c9b9279e;
+	address public usdt = 0x52482c2de7cf1a88651C75Ee1d0208118d0B82C6;
 	address[] public investors;
 	IUniswapV2Router02 public immutable uniswapV2Router; // uniswap dex router
+	uint256 public slippageTolerance = 1000;
 
 	uint256 public phase0Supply = 3846154000000000000000000;
 	uint256 public phase1Supply = 4500000000000000000000000;
@@ -1160,7 +1167,6 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	uint256 public poolAmountDistributed; //###
 	uint256 public unlockPrice = 50000000000000000000;
 	uint256 public sepaCommision = 77000000000000000;
-	address public sepaWallet;
 
 	mapping(uint256 => uint256) public levelToCommision;
 	mapping(uint256 => uint256) public poolToSale;
@@ -1168,12 +1174,13 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	mapping(address => uint256) public poolReward;
 	mapping(address => uint256) public referalIncome;
 
-	address public bnqEOOD;
-	address public bnqTechJSC;
-	address public salesWallet;
-	address public bnqMarketingJSC;
-	address public boardWallet;
-	address public topAccount;
+	address public bnqEOOD = 0x0f5fA99Dc30A3580eff1E26Dcb5b538b2E1861Ab;
+	address public bnqTechJSC = 0xE8ec850bAcb4c752F8858806C7d7264e2FC99120;
+	address public salesWallet = 0x07A8Ea783A3a02cd65B5DCf0F6b7E96fA0eb3AB8;
+	address public bnqMarketingJSC = 0x0B6E2CCb323029982172E81725E227E92764Ac55;
+	address public boardWallet = 0x0C28981e15Bc9BEf7603c2b1DDB21C5c8784f632;
+	address public topAccount = 0xFCAd0B19bB29D4674531d6f115237E16AfCE377c;
+	address public sepaWallet = 0xFCAd0B19bB29D4674531d6f115237E16AfCE377c; // sepa wallet**
 
 	uint256 public seedEOODPercentage = 3000;
 	uint256 public seedTechJSCPercentage = 5000;
@@ -1204,7 +1211,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	}
 
 	event TokensBought(address indexed investor, uint256 indexed usdAmount,
-		uint256 indexed tokenAmount);
+		uint256 indexed tokenAmount, uint256 phase);
 
 	event SupplyEdited(uint256 phase0Supply, uint256 phase1Supply, uint256 phase2Supply,
 		uint256 phase3Supply, uint256 phase4Supply, uint256 phase5Supply, uint256 phase6Supply);
@@ -1214,17 +1221,16 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 
 	event TreasuryUpdated(address treasury);
 
-
 	event ContractsUpdated(address referalContract, address vestingContract);
 
 	event ReferalIncomeDistributed(address user, address referrer, uint256 amountPurchased,
-		uint256 referalAmount, uint256 level);
+		uint256 referalAmount, uint256 levell, uint256 phase);
 
 	event WhitelistUpdated(address user, bool isWhitelisted);
 
 	event BuyAmountUpdated(uint256 min, uint256 max);
 
-    event SlippageToleranceUpdated(uint256 slippage);
+	event SlippageToleranceUpdated(uint256 slippage);
 
 
 	constructor(
@@ -1294,7 +1300,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		seedMarketingJSCPercentage = _seedMarketingJSCPercentage;
 		seedTechJSCPercentage = _seedTechJSCPercentage;
 		seedAffiliatePercentage = _seedAffiliatePercentage;
-		
+
 
 	}
 
@@ -1319,7 +1325,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		marketingJSCPercentage = _marketingJSCPercentage;
 		affiliatePercentage = _affiliatePercentage;
 		poolPercentage = _poolPercentage;
-		
+
 
 	}
 
@@ -1395,11 +1401,11 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		levelToCommision[level] = commision;
 	}
 
-    
-    function updateSlippageTolerance(uint256 _slippage) external  onlyOwner {
-        slippageTolerance = _slippage;
-        emit SlippageToleranceUpdated(_slippage);
-    }
+
+	function updateSlippageTolerance(uint256 _slippage) external onlyOwner {
+		slippageTolerance = _slippage;
+		emit SlippageToleranceUpdated(_slippage);
+	}
 
 
 	function updateContracts(address _referalContract, address _vestingContract) external onlyOwner {
@@ -1467,7 +1473,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			price = phase6Price;
 		}
 		// uint256 tokenAmount = getTokensForPrice(amount, price);
-		uint256 tokenAmount = (amount*(10**18)) / price;
+		uint256 tokenAmount = (amount * (10 ** 18)) / price;
 		require(amount >= minBuyAmount, "Cannot buy less than minimum Buy Amount"); //###
 		require(amount <= maxBuyAmount, "Cannot buy more than Max Buy Amount");
 		if (stage == 0) {
@@ -1512,7 +1518,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 
 		IERC20(banqiro).transfer(vestingContract, tokenAmount);
 		Vesting(vestingContract).vestTokens(msg.sender, tokenAmount);
-		emit TokensBought(msg.sender, amount, tokenAmount);
+		emit TokensBought(msg.sender, amount, tokenAmount, stage);
 
 	}
 
@@ -1520,6 +1526,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		uint256 pool = (amount * poolPercentage) / 10000;
 		if (token == usdt) {
 			IERC20(token).transferFrom(user, address(this), pool);
+			IERC20(token).approve(address(uniswapV2Router), pool);
 			uint256 poolusdc = swapUsdtForUsdc(pool);
 			poolAmount += poolusdc;
 		} else {
@@ -1561,7 +1568,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 				referalIncome[Referal(referalContract).getReferrer(user)] += amount * (levelToCommision[1]) / 10000;
 				rewardFromUser[Referal(referalContract).getReferrer(user)][user] += amount * (levelToCommision[1]) / 10000;
 				emit ReferalIncomeDistributed(user, Referal(referalContract).getReferrer(user), amount,
-					amount * (levelToCommision[1]) / 10000, 1);
+					amount * (levelToCommision[1]) / 10000, 1, getStage());
 				referalAmount = amount * (levelToCommision[1]) / 10000;
 			}
 		}
@@ -1574,6 +1581,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		uint256 pool = (amount * poolPercentage) / 10000;
 		if (token == usdt) {
 			IERC20(token).transferFrom(user, address(this), pool);
+			IERC20(token).approve(address(uniswapV2Router), pool);
 			uint256 poolusdc = swapUsdtForUsdc(pool);
 			poolAmount += poolusdc;
 		} else {
@@ -1597,7 +1605,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			IERC20(token).transferFrom(user, topAccount, referalTotalAmount - referalAmount);
 		}
 	}
- 
+
 
 	function distributeToken(address user, uint256 amount, address token) private returns(uint256 total) {
 		uint totalItemCount = 10;
@@ -1609,7 +1617,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 					referalIncome[Referal(referalContract).getReferrer(_user)] += amount * (levelToCommision[i]) / 10000;
 					rewardFromUser[Referal(referalContract).getReferrer(_user)][_user] += amount * (levelToCommision[i]) / 10000;
 					emit ReferalIncomeDistributed(user, Referal(referalContract).getReferrer(_user), amount,
-						amount * (levelToCommision[i]) / 10000, i);
+						amount * (levelToCommision[i]) / 10000, i, getStage());
 					total += amount * (levelToCommision[i]) / 10000;
 				}
 				_user = Referal(referalContract).getReferrer(_user);
@@ -1787,11 +1795,11 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		path[0] = usdt;
 		path[1] = usdc;
 		uint[] memory amounts = new uint[](2);
-        uint[] memory estimatedAmounts = new uint[](2);
-        estimatedAmounts = uniswapV2Router.getAmountsOut(usdtAmount, path);
+		uint[] memory estimatedAmounts = new uint[](2);
+		estimatedAmounts = uniswapV2Router.getAmountsOut(usdtAmount, path);
 		amounts = uniswapV2Router.swapExactTokensForTokens(
 			usdtAmount,
-			(estimatedAmounts[1]*slippageTolerance)/10000,
+			(estimatedAmounts[1] * slippageTolerance) / 10000,
 			path,
 			address(this),
 			block.timestamp + 1000
