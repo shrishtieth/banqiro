@@ -128,6 +128,7 @@ contract MyToken is ERC20, Ownable {
 		require(!minted, "Already minted");
 		require(_softCapAmount + _liquidityTokens + _marketingTokens +
 			_stakingTokens + _ecosystemTokens == maxSupply, "Invalid values");
+		softCapTokenAmount = _softCapAmount;
 		liquidityTokens = _liquidityTokens;
 		stakingTokens = _stakingTokens;
 		marketingTokens = _marketingTokens;
@@ -143,6 +144,7 @@ contract MyToken is ERC20, Ownable {
 			_bonusStakingTokens +
 			_bonusMarketingTokens +
 			_bonusEcosystemTokens == maxSupply, "Invalid values");
+		hardCapTokenAmount = _hardCapAmount;
 		bonusLiquidityTokens = _bonusLiquidityTokens;
 		bonusStakingTokens = _bonusStakingTokens;
 		bonusMarketingTokens = _bonusMarketingTokens;
