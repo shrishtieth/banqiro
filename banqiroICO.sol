@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at BscScan.com on 2022-12-15
- */
-
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.20;
 library SafeMath {
@@ -1123,7 +1119,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	address public vestingContract = 0x3A987437b545A240079CAa091722239691A0A66D;
 	uint256 public tokenSoldSeedSale;
 	uint256 public tokensSold;
-	address public busd = 0xf8B8dEF2Eb952156F8f97E91d6A183953622E6D1;
+	address public usdc = 0xf8B8dEF2Eb952156F8f97E91d6A183953622E6D1;
 	address public usdt = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
 	address[] public investors;
 	IUniswapV2Router02 public immutable uniswapV2Router; // uniswap dex router
@@ -1439,7 +1435,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		if (!added[msg.sender]) {
 			investors.push(msg.sender);
 		}
-		require(token == usdt || token == busd, "Invalid currency");
+		require(token == usdt || token == usdc, "Invalid currency");
 		require(block.timestamp > seedSaleStartime, "Sale not started");
 		require(block.timestamp < endTime, "Sale Ended");
 		uint256 stage = getStage();
@@ -1471,7 +1467,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			price = phase6Price;
 		}
 		// uint256 tokenAmount = getTokensForPrice(amount, price);
-		uint256 tokenAmount = amount / price;
+		uint256 tokenAmount = (amount*(10**18)) / price;
 		require(amount >= minBuyAmount, "Cannot buy less than minimum Buy Amount"); //###
 		require(amount <= maxBuyAmount, "Cannot buy more than Max Buy Amount");
 		if (stage == 0) {
@@ -1480,8 +1476,8 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			seedSaleAmountRaised += amount;
 			seedSaleUsdInvestedByUser[msg.sender] += amount;
 			seedSaleTokenBoughtUser[msg.sender] += tokenAmount;
-			if (token == busd) {
-				distributeSeedSaleRevenue(amount, msg.sender, busd);
+			if (token == usdc) {
+				distributeSeedSaleRevenue(amount, msg.sender, usdc);
 			} else if (token == usdt) {
 				distributeSeedSaleRevenue(amount, msg.sender, usdt);
 			}
@@ -1491,8 +1487,8 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			saleUsdInvestedByUser[msg.sender] += amount;
 			saleTokenBoughtUser[msg.sender] += tokenAmount;
 			require(saleUsdInvestedByUser[msg.sender] <= maxPurchaseByUser, "Cannot Purchase more than $50.000 worth of token");
-			if (token == busd) {
-				distributeRevenue(amount, msg.sender, busd);
+			if (token == usdc) {
+				distributeRevenue(amount, msg.sender, usdc);
 			} else if (token == usdt) {
 				distributeRevenue(amount, msg.sender, usdt);
 			}
@@ -1504,8 +1500,8 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			bonusTokenBoughtUser[msg.sender] += tokenAmount;
 			require(bonusSaleUsdInvestedByUser[msg.sender] <= maxPurchaseByUser,
 				"Cannot Purchase more than $50.000 worth of token in bonus Sale");
-			if (token == busd) {
-				distributeBonusRevenue(amount, msg.sender, busd);
+			if (token == usdc) {
+				distributeBonusRevenue(amount, msg.sender, usdc);
 			} else if (token == usdt) {
 				distributeBonusRevenue(amount, msg.sender, usdt);
 			}
@@ -1524,8 +1520,8 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		uint256 pool = (amount * poolPercentage) / 10000;
 		if (token == usdt) {
 			IERC20(token).transferFrom(user, address(this), pool);
-			uint256 poolBusd = swapUsdtForBusd(pool);
-			poolAmount += poolBusd;
+			uint256 poolusdc = swapUsdtForUsdc(pool);
+			poolAmount += poolusdc;
 		} else {
 			poolAmount += pool;
 			IERC20(token).transferFrom(user, address(this), pool);
@@ -1578,8 +1574,8 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		uint256 pool = (amount * poolPercentage) / 10000;
 		if (token == usdt) {
 			IERC20(token).transferFrom(user, address(this), pool);
-			uint256 poolBusd = swapUsdtForBusd(pool);
-			poolAmount += poolBusd;
+			uint256 poolusdc = swapUsdtForUsdc(pool);
+			poolAmount += poolusdc;
 		} else {
 			poolAmount += pool;
 			IERC20(token).transferFrom(user, address(this), pool);
@@ -1776,7 +1772,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 				(uint256 amount, , , ) = getEligibleAmount(investors[j]);
 				if (amount >= poolToSale[i]) {
 					uint256 userAmount = ((totalUsdInvestedByUser[investors[j]]) * poolShare) / amountRaised;
-					IERC20(busd).transfer(investors[j], userAmount);
+					IERC20(usdc).transfer(investors[j], userAmount);
 					poolAmountDistributed += userAmount;
 					poolReward[investors[j]] += userAmount;
 				}
@@ -1785,11 +1781,11 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		}
 	}
 
-	function swapUsdtForBusd(uint256 usdtAmount) private returns(uint256 busdAmount) {
+	function swapUsdtForUsdc(uint256 usdtAmount) private returns(uint256 usdcAmount) {
 
 		address[] memory path = new address[](2);
 		path[0] = usdt;
-		path[1] = busd;
+		path[1] = usdc;
 		uint[] memory amounts = new uint[](2);
         uint[] memory estimatedAmounts = new uint[](2);
         estimatedAmounts = uniswapV2Router.getAmountsOut(usdtAmount, path);
