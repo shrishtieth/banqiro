@@ -3,14 +3,19 @@ pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+interface ICO {
+    function totalUsdInvestedByUser(address user) external returns(uint256 amount);
+}
 
 contract Referal is Ownable {
-   
 
     mapping(address => address) public referedBy;
     mapping(address => address[]) public getRefrees;
     mapping(address => uint256) public referredTime;
     mapping(address => bool) public isWhitelisted;
+
+    address public icoAddress;
+    uint256 public minBuyAmount;
     
 
     event Registered(address indexed user, address indexed referrer);
@@ -23,6 +28,7 @@ contract Referal is Ownable {
     function register(address referrer) external{
         require(referrer!= msg.sender,"User can't refer himself");
         require(referedBy[msg.sender] == address(0),"Already registered");
+        require(ICO(icoAddress).totalUsdInvestedByUser(referrer) >= minBuyAmount,"User not eligible to refer");
         referedBy[msg.sender] = referrer;
         getRefrees[referrer].push(msg.sender);
         referredTime[msg.sender] = block.timestamp;
@@ -35,7 +41,12 @@ contract Referal is Ownable {
 
     function getAllRefrees(address user) external  view returns(address[] memory){
         return(getRefrees[user]);
-    }        
+    }    
+
+    function updateICO(address ico, uint256 amount) external onlyOwner {
+        icoAddress = ico;
+        minBuyAmount = amount;
+    }    
 
     function handleWhitelist(address[] memory user, bool isTrue) external onlyOwner {
         for(uint256 i=0; i<user.length; i++){
