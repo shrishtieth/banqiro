@@ -521,7 +521,7 @@ library Address {
 			// The easiest way to bubble the revert reason is using memory via assembly
 			/// @solidity memory-safe-assembly
 			assembly {
-				let returndata_size: = mload(returndata)
+				let returndata_size := mload(returndata)
 				revert(add(32, returndata), returndata_size)
 			}
 		} else {
@@ -1563,7 +1563,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		uint256 referalTotalAmount = (amount * seedAffiliatePercentage) / 10000;
 		uint256 referalAmount;
 		if (Referal(referalContract).getReferrer(user) != address(0)) {
-			if (getLevelsUnlocked(Referal(referalContract).getReferrer(user)) >= 1) {
+			if (totalUsdInvestedByUser[Referal(referalContract).getReferrer(user)] >= minBuyAmount) {
 				IERC20(token).transferFrom(user, Referal(referalContract).getReferrer(user), amount * (levelToCommision[1]) / 10000);
 				referalIncome[Referal(referalContract).getReferrer(user)] += amount * (levelToCommision[1]) / 10000;
 				rewardFromUser[Referal(referalContract).getReferrer(user)][user] += amount * (levelToCommision[1]) / 10000;
@@ -1612,15 +1612,27 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		address _user = user;
 		for (uint i = 1; i <= totalItemCount; i++) {
 			if (Referal(referalContract).getReferrer(_user) != address(0)) {
-				if (getLevelsUnlocked(Referal(referalContract).getReferrer(_user)) >= i) {
-					IERC20(token).transferFrom(user, Referal(referalContract).getReferrer(_user), amount * (levelToCommision[i]) / 10000);
-					referalIncome[Referal(referalContract).getReferrer(_user)] += amount * (levelToCommision[i]) / 10000;
-					rewardFromUser[Referal(referalContract).getReferrer(_user)][_user] += amount * (levelToCommision[i]) / 10000;
-					emit ReferalIncomeDistributed(user, Referal(referalContract).getReferrer(_user), amount,
-						amount * (levelToCommision[i]) / 10000, i, getStage());
-					total += amount * (levelToCommision[i]) / 10000;
+				if (i == 1) {
+					if (totalUsdInvestedByUser[Referal(referalContract).getReferrer(_user)] >= minBuyAmount) {
+						IERC20(token).transferFrom(user, Referal(referalContract).getReferrer(_user), amount * (levelToCommision[i]) / 10000);
+						referalIncome[Referal(referalContract).getReferrer(_user)] += amount * (levelToCommision[i]) / 10000;
+						rewardFromUser[Referal(referalContract).getReferrer(_user)][_user] += amount * (levelToCommision[i]) / 10000;
+						emit ReferalIncomeDistributed(user, Referal(referalContract).getReferrer(_user), amount,
+							amount * (levelToCommision[i]) / 10000, i, getStage());
+						total += amount * (levelToCommision[i]) / 10000;
+					}
+					_user = Referal(referalContract).getReferrer(_user);
+				} else {
+					if (getLevelsUnlocked(Referal(referalContract).getReferrer(_user)) >= i) {
+						IERC20(token).transferFrom(user, Referal(referalContract).getReferrer(_user), amount * (levelToCommision[i]) / 10000);
+						referalIncome[Referal(referalContract).getReferrer(_user)] += amount * (levelToCommision[i]) / 10000;
+						rewardFromUser[Referal(referalContract).getReferrer(_user)][_user] += amount * (levelToCommision[i]) / 10000;
+						emit ReferalIncomeDistributed(user, Referal(referalContract).getReferrer(_user), amount,
+							amount * (levelToCommision[i]) / 10000, i, getStage());
+						total += amount * (levelToCommision[i]) / 10000;
+					}
+					_user = Referal(referalContract).getReferrer(_user);
 				}
-				_user = Referal(referalContract).getReferrer(_user);
 			} else {
 				return total;
 			}
