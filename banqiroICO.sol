@@ -1174,13 +1174,13 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	mapping(address => uint256) public poolReward;
 	mapping(address => uint256) public referalIncome;
 
-	address public bnqEOOD = 0x0f5fA99Dc30A3580eff1E26Dcb5b538b2E1861Ab;
-	address public bnqTechJSC = 0xE8ec850bAcb4c752F8858806C7d7264e2FC99120;
-	address public salesWallet = 0x07A8Ea783A3a02cd65B5DCf0F6b7E96fA0eb3AB8;
-	address public bnqMarketingJSC = 0x0B6E2CCb323029982172E81725E227E92764Ac55;
-	address public boardWallet = 0x0C28981e15Bc9BEf7603c2b1DDB21C5c8784f632;
-	address public topAccount = 0xFCAd0B19bB29D4674531d6f115237E16AfCE377c;
-	address public sepaWallet = 0xFCAd0B19bB29D4674531d6f115237E16AfCE377c; // sepa wallet**
+	address public bnqEOOD = 0x67713F636194520f80f82b51a8BEb8491b0F7F9F;
+	address public bnqTechJSC = 0xf26543614F8F120206465378847bcbF805c87751;
+	address public salesWallet = 0xe26E0D089e3268c56e65Af54A448B670539E4294;
+	address public bnqMarketingJSC = 0x3929D65eCB648c0Da15A4FCf9e43A337D5047Ec1;
+	address public boardWallet = 0x683c7416A4ccD2AaD03e68faCCf4F766a7cfEA9c;
+	address public topAccount = 0x6BE66C9aF95F0E243731559B77Ab402638033d85;
+	address public sepaWallet = 0x710dFFF012707C378aC61dc1E206213a47a8724C; // sepa wallet**
 
 	uint256 public seedEOODPercentage = 3000;
 	uint256 public seedTechJSCPercentage = 5000;
