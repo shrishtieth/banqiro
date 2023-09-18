@@ -1444,13 +1444,12 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		require(token == usdt || token == usdc, "Invalid currency");
 		require(block.timestamp > seedSaleStartime, "Sale not started");
 		require(block.timestamp < endTime, "Sale Ended");
+		require(Referal(referalContract).isWhitelisted(msg.sender) ||
+				Referal(referalContract).getReferrer(msg.sender) != address(0), "Not Eligible, try later"); //###
 		uint256 stage = getStage();
 		uint256 price;
 		if (stage == 0) {
 			price = phase0Price;
-			require(Referal(referalContract).isWhitelisted(msg.sender) ||
-				Referal(referalContract).getReferrer(msg.sender) != address(0), "Not Eligible, try later"); //###
-
 			if (preRegisterationStartTime > block.timestamp) {
 				require(seedSaleUsdInvestedByUser[msg.sender] + amount <= seedSaleBuy, "50.000 worth of tokens bought");
 				seedSaleUsdInvestedByUser[msg.sender] += amount;
