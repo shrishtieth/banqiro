@@ -1745,8 +1745,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		}
 
 		if (otherAmount < highestAmount) {
-			// amount = 2 * otherAmount;
-			amount = 0; //###
+			amount = 2 * otherAmount;
 		} else {
 			amount = otherAmount + highestAmount;
 		}
