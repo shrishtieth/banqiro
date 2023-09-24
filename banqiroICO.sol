@@ -1115,21 +1115,21 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	for IERC20;
 
 	address public banqiro = 0x12d7986d10a94224b4c2390E69Ae20ad7D0C4D45;
-	uint256 public seedSaleStartime = 0;
-	uint256 public preRegisterationStartTime;
-	uint256 public phase1StartTime = 1694009118;
-	uint256 public endTime = 1694181904;
+	uint256 public seedSaleStartime = 1695643200;
+	uint256 public preRegisterationStartTime = 1696507200;
+	uint256 public phase1StartTime = 1696766400;
+	uint256 public endTime = 1680955200;
 	uint256 public seedSaleAmountRaised;
 	uint256 public amountRaised;
 	address public referalContract = 0x64cC5e198d9C623c5cDb2065E6fd7A71f0c3ED41;
 	address public vestingContract = 0xe2473f38f7a6E5280b64679743dFa68d8d17B75A;
 	uint256 public tokenSoldSeedSale;
 	uint256 public tokensSold;
-	address public usdc = 0x5d7d42d0eDA8A1AEfF73AB1Dc26853A6c9b9279e;
-	address public usdt = 0x52482c2de7cf1a88651C75Ee1d0208118d0B82C6;
+	address public usdc = 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d;
+	address public usdt = 0x55d398326f99059fF775485246999027B3197955;
 	address[] public investors;
 	IUniswapV2Router02 public immutable uniswapV2Router; // uniswap dex router
-	uint256 public slippageTolerance = 1000;
+	uint256 public slippageTolerance = 500;
 
 	uint256 public phase0Supply = 3846154000000000000000000;
 	uint256 public phase1Supply = 4500000000000000000000000;
@@ -1257,7 +1257,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		poolToSale[4] = 1000000000000000000000000;
 		poolToSale[5] = 5000000000000000000000000;
 		IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-			0xD99D1c33F9fC3444f8101754aBC46c52416550D1
+			0x10ED43C718714eb63d5aA57B78B54704E256024E
 		);
 		uniswapV2Router = _uniswapV2Router;
 
@@ -1452,8 +1452,6 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			price = phase0Price;
 			if (preRegisterationStartTime > block.timestamp) {
 				require(seedSaleUsdInvestedByUser[msg.sender] + amount <= seedSaleBuy, "50.000 worth of tokens bought");
-				seedSaleUsdInvestedByUser[msg.sender] += amount;
-
 			} else {
 				require(preRegisterationUsdInvestedByUser[msg.sender] + amount <= preRegisterationBuyAmount, "50 worth of tokens bought");
 				preRegisterationUsdInvestedByUser[msg.sender] += amount;
@@ -1501,6 +1499,8 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			tokensSold += tokenAmount;
 			require(tokensSold <= phase6Supply, "SOLD OUT!!"); //###
 			amountRaised += amount;
+			saleUsdInvestedByUser[msg.sender] += amount;
+			saleTokenBoughtUser[msg.sender] += tokenAmount;
 			bonusSaleUsdInvestedByUser[msg.sender] += amount;
 			bonusTokenBoughtUser[msg.sender] += tokenAmount;
 			require(bonusSaleUsdInvestedByUser[msg.sender] <= maxPurchaseByUser,
@@ -1789,7 +1789,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			for (uint256 j = 0; j < totalUsers; j++) {
 				(uint256 amount, , , ) = getEligibleAmount(investors[j]);
 				if (amount >= poolToSale[i]) {
-					uint256 userAmount = ((totalUsdInvestedByUser[investors[j]]) * poolShare) / amountRaised;
+					uint256 userAmount = ((saleUsdInvestedByUser[investors[j]]) * poolShare) / amountRaised;
 					IERC20(usdc).transfer(investors[j], userAmount);
 					poolAmountDistributed += userAmount;
 					poolReward[investors[j]] += userAmount;
