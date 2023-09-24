@@ -1129,7 +1129,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	address public usdt = 0x55d398326f99059fF775485246999027B3197955;
 	address[] public investors;
 	IUniswapV2Router02 public immutable uniswapV2Router; // uniswap dex router
-	uint256 public slippageTolerance = 500;
+	uint256 public slippageTolerance = 50;
 
 	uint256 public phase0Supply = 3846154000000000000000000;
 	uint256 public phase1Supply = 4500000000000000000000000;
@@ -1440,6 +1440,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	function buyToken(address token, uint256 amount) external nonReentrant {
 		if (!added[msg.sender]) {
 			investors.push(msg.sender);
+			added[msg.sender] = true;
 		}
 		require(token == usdt || token == usdc, "Invalid currency");
 		require(block.timestamp > seedSaleStartime, "Sale not started");
@@ -1514,8 +1515,6 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 
 		totalUsdInvestedByUser[msg.sender] += amount;
 		totalTokenBoughtUser[msg.sender] += tokenAmount;
-
-		IERC20(banqiro).transfer(vestingContract, tokenAmount);
 		Vesting(vestingContract).vestTokens(msg.sender, tokenAmount);
 		emit TokensBought(msg.sender, amount, tokenAmount, stage);
 
@@ -1786,17 +1785,30 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		uint256 totalUsers = investors.length;
 		uint256 poolShare = (poolAmount - poolAmountDistributed) / 5;
 		for (uint256 i = 1; i <= 5; i++) {
+			uint256 poolAmountRaised = getUserAmountInvested(i);
 			for (uint256 j = 0; j < totalUsers; j++) {
-				(uint256 amount, , , ) = getEligibleAmount(investors[j]);
+				address user = investors[j];
+				(uint256 amount, , , ) = getEligibleAmount(user);
 				if (amount >= poolToSale[i]) {
-					uint256 userAmount = ((saleUsdInvestedByUser[investors[j]]) * poolShare) / amountRaised;
-					IERC20(usdc).transfer(investors[j], userAmount);
+					uint256 userAmount = ((saleUsdInvestedByUser[user]) * poolShare) / poolAmountRaised;
+					IERC20(usdc).transfer(user, userAmount);
 					poolAmountDistributed += userAmount;
-					poolReward[investors[j]] += userAmount;
+					poolReward[user] += userAmount;
 				}
 
 			}
 		}
+	}
+
+	function getUserAmountInvested(uint256 pool) public view returns(uint256 _poolAmount){
+		    uint256 totalUsers = investors.length;
+            for (uint256 j = 0; j < totalUsers; j++) {
+				(uint256 amount, , , ) = getEligibleAmount(investors[j]);
+				if (amount >= poolToSale[pool]) {
+					_poolAmount += saleUsdInvestedByUser[investors[j]];
+				}
+
+			}
 	}
 
 	function swapUsdtForUsdc(uint256 usdtAmount) private returns(uint256 usdcAmount) {
