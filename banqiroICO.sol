@@ -1118,10 +1118,10 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	uint256 public seedSaleStartime = 1695643200;
 	uint256 public preRegisterationStartTime = 1696507200;
 	uint256 public phase1StartTime = 1696766400;
-	uint256 public endTime = 1680955200;
+	uint256 public endTime = 1712577600;
 	uint256 public seedSaleAmountRaised;
 	uint256 public amountRaised;
-	address public referalContract = 0x64cC5e198d9C623c5cDb2065E6fd7A71f0c3ED41;
+	address public referalContract = 0x84F79813C1b6882b0b25Ef13bdfb6b711De5845f;
 	address public vestingContract = 0xe2473f38f7a6E5280b64679743dFa68d8d17B75A;
 	uint256 public tokenSoldSeedSale;
 	uint256 public tokensSold;
@@ -1470,7 +1470,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		} else if (stage == 6) {
 			price = phase6Price;
 		}
-		// uint256 tokenAmount = getTokensForPrice(amount, price);
+		
 		uint256 tokenAmount = (amount * (10 ** 18)) / price;
 		require(amount >= minBuyAmount, "Cannot buy less than minimum Buy Amount"); //###
 		require(amount <= maxBuyAmount, "Cannot buy more than Max Buy Amount");
@@ -1523,46 +1523,46 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	function distributeRevenue(uint256 amount, address user, address token) private {
 		uint256 pool = (amount * poolPercentage) / 10000;
 		if (token == usdt) {
-			IERC20(token).transferFrom(user, address(this), pool);
-			IERC20(token).approve(address(uniswapV2Router), pool);
+			IERC20(token).safeTransferFrom(user, address(this), pool);
+			IERC20(token).safeIncreaseAllowance(address(uniswapV2Router), pool);
 			uint256 poolusdc = swapUsdtForUsdc(pool);
 			poolAmount += poolusdc;
 		} else {
 			poolAmount += pool;
-			IERC20(token).transferFrom(user, address(this), pool);
+			IERC20(token).safeTransferFrom(user, address(this), pool);
 		}
 		uint256 EOODAmount = (amount * EOODPercentage) / 10000;
-		IERC20(token).transferFrom(user, bnqEOOD, EOODAmount);
+		IERC20(token).safeTransferFrom(user, bnqEOOD, EOODAmount);
 		uint256 techAmount = (amount * techJSCPercentage) / 10000;
-		IERC20(token).transferFrom(user, sepaWallet, sepaCommision);
-		IERC20(token).transferFrom(user, bnqTechJSC, techAmount - sepaCommision);
+		IERC20(token).safeTransferFrom(user, sepaWallet, sepaCommision);
+		IERC20(token).safeTransferFrom(user, bnqTechJSC, techAmount - sepaCommision);
 		uint256 salesAmount = (amount * salesPercentage) / 10000;
-		IERC20(token).transferFrom(user, salesWallet, salesAmount);
+		IERC20(token).safeTransferFrom(user, salesWallet, salesAmount);
 		uint256 marketingAmount = (amount * marketingJSCPercentage) / 10000;
-		IERC20(token).transferFrom(user, bnqMarketingJSC, marketingAmount);
+		IERC20(token).safeTransferFrom(user, bnqMarketingJSC, marketingAmount);
 		uint256 board = (amount * boardPercentage) / 10000;
-		IERC20(token).transferFrom(user, boardWallet, board);
+		IERC20(token).safeTransferFrom(user, boardWallet, board);
 		uint256 referalTotalAmount = (amount * affiliatePercentage) / 10000;
 		uint256 referalAmount = distributeToken(user, amount, token);
 		if (referalTotalAmount > referalAmount) {
-			IERC20(token).transferFrom(user, topAccount, referalTotalAmount - referalAmount);
+			IERC20(token).safeTransferFrom(user, topAccount, referalTotalAmount - referalAmount);
 		}
 	}
 
 	function distributeSeedSaleRevenue(uint256 amount, address user, address token) private {
 
 		uint256 EOODAmount = (amount * seedEOODPercentage) / 10000;
-		IERC20(token).transferFrom(user, bnqEOOD, EOODAmount);
+		IERC20(token).safeTransferFrom(user, bnqEOOD, EOODAmount);
 		uint256 techAmount = (amount * seedTechJSCPercentage) / 10000;
-		IERC20(token).transferFrom(user, sepaWallet, sepaCommision);
-		IERC20(token).transferFrom(user, bnqTechJSC, techAmount - sepaCommision);
+		IERC20(token).safeTransferFrom(user, sepaWallet, sepaCommision);
+		IERC20(token).safeTransferFrom(user, bnqTechJSC, techAmount - sepaCommision);
 		uint256 marketingAmount = (amount * seedMarketingJSCPercentage) / 10000;
-		IERC20(token).transferFrom(user, bnqMarketingJSC, marketingAmount);
+		IERC20(token).safeTransferFrom(user, bnqMarketingJSC, marketingAmount);
 		uint256 referalTotalAmount = (amount * seedAffiliatePercentage) / 10000;
 		uint256 referalAmount;
 		if (Referal(referalContract).getReferrer(user) != address(0)) {
 			if (totalUsdInvestedByUser[Referal(referalContract).getReferrer(user)] >= minBuyAmount) {
-				IERC20(token).transferFrom(user, Referal(referalContract).getReferrer(user), amount * (levelToCommision[1]) / 10000);
+				IERC20(token).safeTransferFrom(user, Referal(referalContract).getReferrer(user), amount * (levelToCommision[1]) / 10000);
 				referalIncome[Referal(referalContract).getReferrer(user)] += amount * (levelToCommision[1]) / 10000;
 				rewardFromUser[Referal(referalContract).getReferrer(user)][user] += amount * (levelToCommision[1]) / 10000;
 				emit ReferalIncomeDistributed(user, Referal(referalContract).getReferrer(user), amount,
@@ -1571,36 +1571,36 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			}
 		}
 		if (referalTotalAmount > referalAmount) {
-			IERC20(token).transferFrom(user, topAccount, referalTotalAmount - referalAmount);
+			IERC20(token).safeTransferFrom(user, topAccount, referalTotalAmount - referalAmount);
 		}
 	}
 
 	function distributeBonusRevenue(uint256 amount, address user, address token) private {
 		uint256 pool = (amount * poolPercentage) / 10000;
 		if (token == usdt) {
-			IERC20(token).transferFrom(user, address(this), pool);
-			IERC20(token).approve(address(uniswapV2Router), pool);
+			IERC20(token).safeTransferFrom(user, address(this), pool);
+			IERC20(token).safeIncreaseAllowance(address(uniswapV2Router), pool);
 			uint256 poolusdc = swapUsdtForUsdc(pool);
 			poolAmount += poolusdc;
 		} else {
 			poolAmount += pool;
-			IERC20(token).transferFrom(user, address(this), pool);
+			IERC20(token).safeTransferFrom(user, address(this), pool);
 		}
 		uint256 EOODAmount = (amount * bonusEOODPercentage) / 10000;
-		IERC20(token).transferFrom(user, bnqEOOD, EOODAmount);
+		IERC20(token).safeTransferFrom(user, bnqEOOD, EOODAmount);
 		uint256 techAmount = (amount * bonusTechJSCPercentage) / 10000;
-		IERC20(token).transferFrom(user, sepaWallet, sepaCommision);
-		IERC20(token).transferFrom(user, bnqTechJSC, techAmount - sepaCommision);
+		IERC20(token).safeTransferFrom(user, sepaWallet, sepaCommision);
+		IERC20(token).safeTransferFrom(user, bnqTechJSC, techAmount - sepaCommision);
 		uint256 salesAmount = (amount * bonusSalesPercentage) / 10000;
-		IERC20(token).transferFrom(user, salesWallet, salesAmount);
+		IERC20(token).safeTransferFrom(user, salesWallet, salesAmount);
 		uint256 marketingAmount = (amount * bonusMarketingJSCPercentage) / 10000;
-		IERC20(token).transferFrom(user, bnqMarketingJSC, marketingAmount);
+		IERC20(token).safeTransferFrom(user, bnqMarketingJSC, marketingAmount);
 		uint256 board = (amount * bonusBoardPercentage) / 10000;
-		IERC20(token).transferFrom(user, boardWallet, board);
+		IERC20(token).safeTransferFrom(user, boardWallet, board);
 		uint256 referalTotalAmount = (amount * affiliatePercentage) / 10000;
 		uint256 referalAmount = distributeToken(user, amount, token);
 		if (referalTotalAmount > referalAmount) {
-			IERC20(token).transferFrom(user, topAccount, referalTotalAmount - referalAmount);
+			IERC20(token).safeTransferFrom(user, topAccount, referalTotalAmount - referalAmount);
 		}
 	}
 
@@ -1612,7 +1612,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			if (Referal(referalContract).getReferrer(_user) != address(0)) {
 				if (i == 1) {
 					if (totalUsdInvestedByUser[Referal(referalContract).getReferrer(_user)] >= minBuyAmount) {
-						IERC20(token).transferFrom(user, Referal(referalContract).getReferrer(_user), amount * (levelToCommision[i]) / 10000);
+						IERC20(token).safeTransferFrom(user, Referal(referalContract).getReferrer(_user), amount * (levelToCommision[i]) / 10000);
 						referalIncome[Referal(referalContract).getReferrer(_user)] += amount * (levelToCommision[i]) / 10000;
 						rewardFromUser[Referal(referalContract).getReferrer(_user)][_user] += amount * (levelToCommision[i]) / 10000;
 						emit ReferalIncomeDistributed(user, Referal(referalContract).getReferrer(_user), amount,
@@ -1622,7 +1622,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 					_user = Referal(referalContract).getReferrer(_user);
 				} else {
 					if (getLevelsUnlocked(Referal(referalContract).getReferrer(_user)) >= i) {
-						IERC20(token).transferFrom(user, Referal(referalContract).getReferrer(_user), amount * (levelToCommision[i]) / 10000);
+						IERC20(token).safeTransferFrom(user, Referal(referalContract).getReferrer(_user), amount * (levelToCommision[i]) / 10000);
 						referalIncome[Referal(referalContract).getReferrer(_user)] += amount * (levelToCommision[i]) / 10000;
 						rewardFromUser[Referal(referalContract).getReferrer(_user)][_user] += amount * (levelToCommision[i]) / 10000;
 						emit ReferalIncomeDistributed(user, Referal(referalContract).getReferrer(_user), amount,
@@ -1821,7 +1821,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		estimatedAmounts = uniswapV2Router.getAmountsOut(usdtAmount, path);
 		amounts = uniswapV2Router.swapExactTokensForTokens(
 			usdtAmount,
-			(estimatedAmounts[1] * slippageTolerance) / 10000,
+			(estimatedAmounts[1] * (10000 - slippageTolerance)) / 10000,
 			path,
 			address(this),
 			block.timestamp + 1000
