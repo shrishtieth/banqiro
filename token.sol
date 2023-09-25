@@ -77,7 +77,7 @@ interface ICO {
 
 }
 
-contract MyToken is ERC20, Ownable {
+contract Banqiro is ERC20, Ownable {
 
 	uint256 maxSupply = 175000000000000000000000000;
 
@@ -92,14 +92,14 @@ contract MyToken is ERC20, Ownable {
 	uint256 public softCapTokenAmount = 51169071000000000000000000;
 	uint256 public hardCapTokenAmount = 70406955000000000000000000;
 
-	uint256 public liquidityTokens;
-	uint256 public stakingTokens;
-	uint256 public marketingTokens;
-	uint256 public ecosystemTokens;
-	uint256 public bonusLiquidityTokens;
-	uint256 public bonusStakingTokens;
-	uint256 public bonusMarketingTokens;
-	uint256 public bonusEcosystemTokens;
+	uint256 public liquidityTokens = 51169071000000000000000000;
+	uint256 public stakingTokens = 15350721000000000000000000;
+	uint256 public marketingTokens = 12500000000000000000000000;
+	uint256 public ecosystemTokens = 89209374000000000000000000;
+	uint256 public bonusLiquidityTokens = 9905660000000000000000000;
+	uint256 public bonusStakingTokens = 21122087000000000000000000;
+	uint256 public bonusMarketingTokens = 12500000000000000000000000;
+	uint256 public bonusEcosystemTokens = 61065298000000000000000000;
 
 	bool public minted;
 
