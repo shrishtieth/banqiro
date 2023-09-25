@@ -1,5 +1,5 @@
     // SPDX-License-Identifier: MIT
-    pragma solidity 0.8.20;
+    pragma solidity 0.8.19;
 
     interface IERC20 {
     	/**
@@ -505,8 +505,9 @@ library SafeERC20 {
     	address public banqiroToken;
     	uint256 public totalTokensVested;
     	uint256 public totalTokensUnvested;
-    	uint256 public preSaleEnd = 1677983961 ;
+    	uint256 public preSaleEnd = 1712577600 ;
     	uint256 public cliff = 15780000;
+        uint256 public monthSeconds = 2592000;
 
     	address[] public allUsers;
     	mapping(address => bool) public added;
@@ -549,7 +550,7 @@ library SafeERC20 {
     		uint256 unlockedAmount = getUserUnlockedAmount(msg.sender);
     		uint256 claimableAmount = unlockedAmount - userClaimedAmount[msg.sender];
     		if (claimableAmount > 0) {
-    			IERC20(banqiroToken).transfer(msg.sender, claimableAmount);
+    			IERC20(banqiroToken).safeTransfer(msg.sender, claimableAmount);
     			userClaimedAmount[msg.sender] += claimableAmount;
     			emit Unvested(msg.sender, claimableAmount);
     		}
@@ -557,17 +558,19 @@ library SafeERC20 {
     	}
 
 		function getMonth() external  view returns (uint256 months){
-			return((block.timestamp - (preSaleEnd + cliff)) / 2592000);
+			return((block.timestamp - (preSaleEnd + cliff)) / monthSeconds);
 		}
 
     	function getUserUnlockedAmount(address user) public view returns(uint256 amount) {
-
-    		if (block.timestamp < preSaleEnd + cliff || (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 1) {
-				uint256 currentBlock = getMonthBlock(((block.timestamp - (preSaleEnd + cliff)) / 2592000) + 1);
+            if (block.timestamp < preSaleEnd + cliff ){
+                amount = 0;
+            }
+    		else if ((block.timestamp - (preSaleEnd + cliff)) / monthSeconds < 1) {
+				uint256 currentBlock = getMonthBlock(((block.timestamp - (preSaleEnd + cliff)) / monthSeconds) + 1);
 				uint256 blockAmount = (currentBlock * ((200 * userVestedAmount[user]) / 10000))/864000;
     			amount = 0 + blockAmount;
-    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 1 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 7) {
-    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / monthSeconds >= 1 && (block.timestamp - (preSaleEnd + cliff)) / monthSeconds < 7) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / monthSeconds;
 				uint256 currentBlock = getMonthBlock(months + 1);
 				uint256 blockAmount;
 				if(months == 6){
@@ -578,8 +581,8 @@ library SafeERC20 {
 				}
     			amount = ((200 * userVestedAmount[user] * months) / 10000) + blockAmount ;
 
-    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 7 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 13) {
-    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / monthSeconds >= 7 && (block.timestamp - (preSaleEnd + cliff)) / monthSeconds < 13) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / monthSeconds;
 				uint256 currentBlock = getMonthBlock(months + 1);
 				uint256 blockAmount;
 				if(months == 12){
@@ -590,8 +593,8 @@ library SafeERC20 {
 				}
     			amount = (((1200 + (225 * (months - 6))) * userVestedAmount[user]) / 10000) + blockAmount;
 
-    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 13 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 19) {
-    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / monthSeconds >= 13 && (block.timestamp - (preSaleEnd + cliff)) / monthSeconds < 19) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / monthSeconds;
 				uint256 currentBlock = getMonthBlock(months + 1);
 				uint256 blockAmount;
 				if(months == 18){
@@ -602,8 +605,8 @@ library SafeERC20 {
 				}
     			amount = (((2550 + (275 * (months - 12))) * userVestedAmount[user]) / 10000) + blockAmount;
 
-    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 19 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 25) {
-    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / monthSeconds >= 19 && (block.timestamp - (preSaleEnd + cliff)) / monthSeconds < 25) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / monthSeconds;
 				uint256 currentBlock = getMonthBlock(months + 1);
 				uint256 blockAmount;
 				if(months == 24){
@@ -614,8 +617,8 @@ library SafeERC20 {
 				}
     			amount = (((4200 + (300 * (months - 18))) * userVestedAmount[user]) / 10000) + blockAmount;
 
-    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 25 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 31) {
-    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / monthSeconds >= 25 && (block.timestamp - (preSaleEnd + cliff)) / monthSeconds < 31) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / monthSeconds;
 				uint256 currentBlock = getMonthBlock(months + 1);
 				uint256 blockAmount;
 				if(months == 30){
@@ -626,8 +629,8 @@ library SafeERC20 {
 				}
     			amount = (((6000 + (325 * (months - 24))) * userVestedAmount[user]) / 10000) + blockAmount;
 
-    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 31 && (block.timestamp - (preSaleEnd + cliff)) / 2592000 < 36) {
-    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / monthSeconds >= 31 && (block.timestamp - (preSaleEnd + cliff)) / monthSeconds < 36) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / monthSeconds;
 				uint256 currentBlock = getMonthBlock(months + 1);
 				uint256 blockAmount;
 				if(months == 35){
@@ -638,8 +641,8 @@ library SafeERC20 {
 				}
     			amount = (((7950 + (350 * (months - 30))) * userVestedAmount[user]) / 10000) + blockAmount;
 
-    		} else if ((block.timestamp - (preSaleEnd + cliff)) / 2592000 >= 36) {
-    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / 2592000;
+    		} else if ((block.timestamp - (preSaleEnd + cliff)) / monthSeconds >= 36) {
+    			uint256 months = (block.timestamp - (preSaleEnd + cliff)) / monthSeconds;
     			if (months > 36) {
     				months = 36;
     			}
@@ -650,7 +653,7 @@ library SafeERC20 {
 
 
 		function getMonthBlock(uint256 month) public view returns(uint256 currentBlock){
-			uint256 monthStart = preSaleEnd + cliff + ((month - 1) * 259200);
+			uint256 monthStart = preSaleEnd + cliff + ((month - 1) * monthSeconds);
 			currentBlock = (block.timestamp - monthStart)/3;
 		}
 
@@ -660,7 +663,7 @@ library SafeERC20 {
 
     	function withdrawTokens(IERC20 token, address wallet) external onlyOwner {
     		uint256 balanceOfContract = token.balanceOf(address(this));
-    		token.transfer(wallet, balanceOfContract);
+    		token.safeTransfer(wallet, balanceOfContract);
     	}
 
     }
