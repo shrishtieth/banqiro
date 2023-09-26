@@ -505,7 +505,7 @@ library SafeERC20 {
     	address public banqiroToken;
     	uint256 public totalTokensVested;
     	uint256 public totalTokensUnvested;
-    	uint256 public preSaleEnd = 1712577600 ;
+    	uint256 public preSaleEnd = 1712664000 ;
     	uint256 public cliff = 15780000;
         uint256 public monthSeconds = 2592000;
 
@@ -513,7 +513,6 @@ library SafeERC20 {
     	mapping(address => bool) public added;
     	mapping(address => uint256) public userVestedAmount;
     	mapping(address => uint256) public userClaimedAmount;
-    	mapping(uint256 => uint256) public monthToPercentage;
 
     	event Vested(address indexed user, uint256 amount);
     	event Unvested(address indexed user, uint256 amount);
@@ -552,6 +551,7 @@ library SafeERC20 {
     		if (claimableAmount > 0) {
     			IERC20(banqiroToken).safeTransfer(msg.sender, claimableAmount);
     			userClaimedAmount[msg.sender] += claimableAmount;
+                totalTokensUnvested += claimableAmount;
     			emit Unvested(msg.sender, claimableAmount);
     		}
 
@@ -657,11 +657,15 @@ library SafeERC20 {
 			currentBlock = (block.timestamp - monthStart)/3;
 		}
 
+        function getClaimableAmount(address user) external view returns(uint256 amount){
+            amount = getUserUnlockedAmount(user) - userClaimedAmount[user];
+        }
+
     	function updateAllowed(address user, bool allowed) external onlyOwner {
     		allowedToCall[user] = allowed;
     	}
 
-    	function withdrawTokens(IERC20 token, address wallet) external onlyOwner {
+    	function withdrawLeftOverTokens(IERC20 token, address wallet) external onlyOwner {
     		uint256 balanceOfContract = token.balanceOf(address(this));
     		token.safeTransfer(wallet, balanceOfContract);
     	}
