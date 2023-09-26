@@ -1714,7 +1714,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 
 	function withdrawTokens(IERC20 token, address wallet) external onlyOwner {
 		uint256 balanceOfContract = token.balanceOf(address(this));
-		token.transfer(wallet, balanceOfContract);
+		token.safeTransfer(wallet, balanceOfContract);
 	}
 
 	/*
@@ -1789,7 +1789,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 				(uint256 amount, , , ) = getEligibleAmount(user);
 				if (amount >= poolToSale[i]) {
 					uint256 userAmount = ((saleUsdInvestedByUser[user]) * poolShare) / poolAmountRaised;
-					IERC20(usdc).transfer(user, userAmount);
+					IERC20(usdc).safeTransfer(user, userAmount);
 					poolAmountDistributed += userAmount;
 					poolReward[user] += userAmount;
 				}
