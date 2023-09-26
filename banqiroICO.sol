@@ -1114,15 +1114,15 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	using SafeERC20
 	for IERC20;
 
-	address public banqiro = 0x12d7986d10a94224b4c2390E69Ae20ad7D0C4D45;
+	address public banqiro = 0xeb49A658D2bAB9567c872a7214B00D3895Ed3126;
 	uint256 public seedSaleStartime = 1695643200;
 	uint256 public preRegisterationStartTime = 1696507200;
-	uint256 public phase1StartTime = 1696766400;
-	uint256 public endTime = 1712577600;
+	uint256 public phase1StartTime = 1696852800;
+	uint256 public endTime = 1712664000;
 	uint256 public seedSaleAmountRaised;
 	uint256 public amountRaised;
-	address public referalContract = 0x84F79813C1b6882b0b25Ef13bdfb6b711De5845f;
-	address public vestingContract = 0xe2473f38f7a6E5280b64679743dFa68d8d17B75A;
+	address public referalContract = 0x32C6e5952867F7771a238f757b15cfF088f915C3;
+	address public vestingContract = 0x1dCb6B575Df8E2f1d5F15644E16c594D607C20e6;
 	uint256 public tokenSoldSeedSale;
 	uint256 public tokensSold;
 	address public usdc = 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d;
@@ -1154,7 +1154,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	uint256 public minBuyAmount = 50000000000000000000;
 	uint256 public maxBuyAmount = 50000000000000000000000;
 	uint256 public seedSaleBuy = 50000000000000000000000;
-	uint256 public preRegisterationBuyAmount = 50000000000000000000; //###
+	uint256 public preRegisterationBuyAmount = 50000000000000000000; 
 	uint256 public maxPurchaseByUser = 50000000000000000000000;
 	uint256 public phase0Price = 130000000000000000;
 	uint256 public phase1Price = 150000000000000000; //0.01
@@ -1164,7 +1164,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 	uint256 public phase5Price = 255000000000000000;
 	uint256 public phase6Price = 265000000000000000;
 	uint256 public poolAmount;
-	uint256 public poolAmountDistributed; //###
+	uint256 public poolAmountDistributed; 
 	uint256 public unlockPrice = 50000000000000000000;
 	uint256 public sepaCommision = 77000000000000000;
 
@@ -1234,13 +1234,11 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 
 
 	constructor(
-		address banqiroToken,
-		uint256 _start
+		address banqiroToken
 
 	) {
 
 		banqiro = (banqiroToken);
-		seedSaleStartime = _start;
 		levelToCommision[1] = 1000;
 		levelToCommision[2] = 400;
 		levelToCommision[3] = 300;
@@ -1446,7 +1444,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		require(block.timestamp > seedSaleStartime, "Sale not started");
 		require(block.timestamp < endTime, "Sale Ended");
 		require(Referal(referalContract).isWhitelisted(msg.sender) ||
-				Referal(referalContract).getReferrer(msg.sender) != address(0), "Not Eligible, try later"); //###
+				Referal(referalContract).getReferrer(msg.sender) != address(0), "Not Eligible, try later"); 
 		uint256 stage = getStage();
 		uint256 price;
 		if (stage == 0) {
@@ -1472,7 +1470,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 		}
 		
 		uint256 tokenAmount = (amount * (10 ** 18)) / price;
-		require(amount >= minBuyAmount, "Cannot buy less than minimum Buy Amount"); //###
+		require(amount >= minBuyAmount, "Cannot buy less than minimum Buy Amount"); 
 		require(amount <= maxBuyAmount, "Cannot buy more than Max Buy Amount");
 		if (stage == 0) {
 			tokenSoldSeedSale += tokenAmount;
@@ -1498,7 +1496,7 @@ contract BanqiroTokenICO is Ownable, ReentrancyGuard {
 			}
 		} else {
 			tokensSold += tokenAmount;
-			require(tokensSold <= phase6Supply, "SOLD OUT!!"); //###
+			require(tokensSold <= phase6Supply, "SOLD OUT!!"); 
 			amountRaised += amount;
 			saleUsdInvestedByUser[msg.sender] += amount;
 			saleTokenBoughtUser[msg.sender] += tokenAmount;
